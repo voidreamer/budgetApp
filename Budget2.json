@@ -1,0 +1,26 @@
+[
+  {
+    "Category": "Food",
+    "Expense": "Grocery",
+    "Amount": "300",
+    "Actual spending": "400"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Eating out",
+    "Amount": "50",
+    "Actual spending": "61"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "Movie",
+    "Amount": "50",
+    "Actual spending": "50"
+  },
+  {
+    "Category": "Travel",
+    "Expense": "Airfare",
+    "Amount": "1000",
+    "Actual spending": "10"
+  }
+]
