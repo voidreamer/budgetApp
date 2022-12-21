@@ -2,58 +2,59 @@ from PySide2 import QtWidgets, QtGui, QtCore
 import json
 import sys
 
-import seaborn as sns
-import matplotlib.pyplot as plt
+import dataVisualization
 
 
-class TableEditor(QtWidgets.QMainWindow):
-    def __init__(self):
+class BudgetEditorWindow(QtWidgets.QMainWindow):
+    def __init__(self, data_path):
         super().__init__()
-        self.initUI()
+        self._data_path = data_path
+        self._data = set_json_data(data_path)
+        self.init_UI()
 
-    def initUI(self):
-        # Create a table widget and set its columns and data
+    def init_UI(self):
+        # Set the window title and size
+        self.setWindowTitle('Budget App')
+        self.resize(600, 400)
+
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(4)  # Set the number of columns to 4
+        self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(
-            ['Category', 'Expense', 'Amount', 'Actual spending'])  # Set the column labels
-        self.setTableData()
+            ['Category', 'Expense', 'Amount', 'Actual spending'])
+        self.set_table_data()
 
-        # Connect the itemChanged signal to the setCellStyle method
-        self.table.itemChanged.connect(self.setCellStyle)
+        self.table.itemChanged.connect(self.set_cell_style)
 
-        # Create a button to save the table data
-        self.saveButton = QtWidgets.QPushButton('Save')
-        self.saveButton.clicked.connect(self.saveTableData)
+        # Create a button to save the table data to the loaded json file.
+        self.save_button = QtWidgets.QPushButton('Save')
+        self.save_button.clicked.connect(self.save_table_data)
 
-        # Create a button to visualize the table data as a graph
-        self.visualizeButton = QtWidgets.QPushButton('Visualize graph')
-        self.visualizeButton.clicked.connect(self.visualizeData)
+        # Create a button to visualize the table data as a graph.
+        self.visualize_button = QtWidgets.QPushButton('Visualize graph')
+        self.visualize_button.clicked.connect(self.visualize_data)
 
-        # Create a layout to hold the table, save button, and visualize button
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.table)
-        buttonLayout = QtWidgets.QHBoxLayout()
-        buttonLayout.addWidget(self.saveButton)
-        buttonLayout.addWidget(self.visualizeButton)
-        layout.addLayout(buttonLayout)
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addWidget(self.save_button)
+        button_layout.addWidget(self.visualize_button)
+        layout.addLayout(button_layout)
 
-        # Create a widget to hold the layout and set it as the central widget
         widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def setTableData(self):
-        # Read the JSON file and set the table data
-        with open('Budget2.json', 'r') as jsonfile:
-            data = json.load(jsonfile)
-            rowCount = len(data)
-            self.table.setRowCount(rowCount)
-            for i, row in enumerate(data):
-                for j, value in enumerate(row.values()):
-                    self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
+        set_dark_theme()
 
-    def setCellStyle(self, item):
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def data_path(self):
+        return self._data_path
+
+    def set_cell_style(self, item):
         # Set the cell style based on the values in the "Actual spending" and "Amount" columns
         if item.column() == 3:  # Check if the changed item is in the "Actual spending" column
             # Get the value in the "Amount" column for the same row
@@ -69,7 +70,7 @@ class TableEditor(QtWidgets.QMainWindow):
                     item.setForeground(QtGui.QColor('black'))
                     item.setBackground(QtGui.QColor('white'))
 
-    def saveTableData(self):
+    def save_table_data(self):
         # Write the table data to a JSON file
         data = []
         for i in range(self.table.rowCount()):
@@ -81,27 +82,48 @@ class TableEditor(QtWidgets.QMainWindow):
                 else:
                     row[self.table.horizontalHeaderItem(j).text()] = ''
             data.append(row)
-        with open('Budget2.json', 'w') as jsonfile:
+        with open(self.data_path, 'w') as jsonfile:
             json.dump(data, jsonfile, indent=2)
 
-    def visualizeData(self):
-        # Read the JSON data from the file
-        with open('Budget2.json', 'r') as jsonfile:
-            data = json.load(jsonfile)
+    def set_table_data(self):
+        row_count = len(self.data)
+        self.table.setRowCount(row_count)
+        for i, row in enumerate(self.data):
+            for j, value in enumerate(row.values()):
+                self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
 
-        # Extract the category, expense, and actual spending data from the JSON data
-        categories = [row['Category'] for row in data]
-        expenses = [row['Expense'] for row in data]
-        amounts = [int(row['Amount']) for row in data]
-        actual = [int(row['Actual spending']) for row in data]
+    def visualize_data(self):
+        dataVisualization.visualize_data(self.data)
 
-        # Create a Seaborn barplot to visualize the data
-        sns.barplot(x=categories, y=actual, hue=expenses)
-        plt.show()
+
+# Util functions.
+def set_dark_theme():
+    # Set the dark theme
+    dark_palette = QtGui.QPalette()
+    dark_palette.setColor(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
+    dark_palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(255, 255, 255))
+    dark_palette.setColor(QtGui.QPalette.Base, QtGui.QColor(25, 25, 25))
+    dark_palette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(53, 53, 53))
+    dark_palette.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(255, 255, 255))
+    dark_palette.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(255, 255, 255))
+    dark_palette.setColor(QtGui.QPalette.Text, QtGui.QColor(255, 255, 255))
+    dark_palette.setColor(QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
+    dark_palette.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(255, 255, 255))
+    dark_palette.setColor(QtGui.QPalette.BrightText, QtCore.Qt.red)
+    dark_palette.setColor(QtGui.QPalette.Link, QtGui.QColor(42, 130, 218))
+    dark_palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(42, 130, 218))
+    dark_palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
+    QtWidgets.QApplication.setPalette(dark_palette)
+    QtWidgets.QApplication.setStyle('Fusion')
+
+
+def set_json_data(data_path):
+    with open(data_path, 'r') as jsonfile:
+        return json.load(jsonfile)
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    tableEditor = TableEditor()
+    tableEditor = BudgetEditorWindow(data_path='budget.json')
     tableEditor.show()
     sys.exit(app.exec_())
