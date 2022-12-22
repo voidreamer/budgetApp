@@ -1,8 +1,8 @@
 from PySide2 import QtWidgets, QtGui, QtCore
 import json
 import sys
-
-import dataVisualization
+from matplotlib import pyplot
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 
 class BudgetEditorWindow(QtWidgets.QMainWindow):
@@ -13,17 +13,22 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.init_UI()
 
     def init_UI(self):
-        # Set the window title and size
-        self.setWindowTitle('Budget App')
-        self.resize(600, 400)
+        # Create a calendar widget
+        self.calendar = QtWidgets.QCalendarWidget()
+        self.calendar.setGridVisible(True)
+        self.calendar.selectionChanged.connect(self.on_calendar_selection_changed)
 
         self.table = QtWidgets.QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(
-            ['Category', 'Expense', 'Amount', 'Actual spending'])
+            ['Category', 'Expense', 'Allotted', 'Spending'])
         self.set_table_data()
 
         self.table.itemChanged.connect(self.set_cell_style)
+        self.figure, self.axes = pyplot.subplots()
+
+        # Create a FigureCanvasQTAgg object to display the figure
+        self.figure_canvas = FigureCanvasQTAgg(self.figure)
 
         # Create a button to save the table data to the loaded json file.
         self.save_button = QtWidgets.QPushButton('Save')
@@ -34,6 +39,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.visualize_button.clicked.connect(self.visualize_data)
 
         layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.calendar)
+        layout.addWidget(self.figure_canvas)
         layout.addWidget(self.table)
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
@@ -43,24 +50,27 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-
         set_dark_theme()
 
-    @property
-    def data(self):
-        return self._data
+    def on_calendar_selection_changed(self):
+        # Update the table data when the calendar selection changes
+        print(f'month : {self.calendar.selectedDate().toString("MMMM")}')
+        self._data = self.get_data_for_month(self.calendar.selectedDate().toString("MMMM"))
+        self.set_table_data()
 
-    @property
-    def data_path(self):
-        return self._data_path
+    def get_data_for_month(self, month):
+        # Return the data for the specified month from the JSON file
+        with open(self._data_path, 'r') as jsonfile:
+            data = json.load(jsonfile)
+        return [row for row in data if row['Month'] == month]
 
     def set_cell_style(self, item):
-        # Set the cell style based on the values in the "Actual spending" and "Amount" columns
-        if item.column() == 3:  # Check if the changed item is in the "Actual spending" column
-            # Get the value in the "Amount" column for the same row
+        # Set the cell style based on the values in the "Spending" and "Allotted" columns
+        if item.column() == 3:  # Check if the changed item is in the "Spending" column
+            # Get the value in the "Allotted" column for the same row
             amount = self.table.item(item.row(), 2)
             if amount:
-                # If the value in the "Actual spending" column is greater than the value in the "Amount" column,
+                # If the value in the "Spending" column is greater than the value in the "Allotted" column,
                 # set the cell text color to white and the cell background color to red
                 if int(item.text()) > int(amount.text()):
                     item.setForeground(QtGui.QColor('white'))
@@ -71,8 +81,17 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                     item.setBackground(QtGui.QColor('white'))
 
     def save_table_data(self):
-        # Write the table data to a JSON file
-        data = []
+        # Read the JSON file and store the data in a list
+        with open(self._data_path, 'r') as jsonfile:
+            data = json.load(jsonfile)
+
+        # Get the selected month from the calendar widget
+        selected_month = self.calendar.selectedDate().toString("MMMM")
+
+        # Remove the existing data for the selected month from the data list
+        data = [row for row in data if row['Month'] != selected_month]
+
+        # Add the new data for the selected month to the data list
         for i in range(self.table.rowCount()):
             row = {}
             for j in range(self.table.columnCount()):
@@ -81,22 +100,67 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                     row[self.table.horizontalHeaderItem(j).text()] = item.text()
                 else:
                     row[self.table.horizontalHeaderItem(j).text()] = ''
+            # Add the selected month to the row data
+            row['Month'] = selected_month
             data.append(row)
-        with open(self.data_path, 'w') as jsonfile:
+
+        # Write the data to the JSON file
+        with open(self._data_path, 'w') as jsonfile:
             json.dump(data, jsonfile, indent=2)
 
     def set_table_data(self):
-        row_count = len(self.data)
+        # Get the selected month from the calendar widget
+        selected_month = self.calendar.selectedDate().toString('MMMM')
+
+        # Filter the data to only include the selected month
+        data = [row for row in self._data if row['Month'] == selected_month]
+
+        row_count = len(data)
         self.table.setRowCount(row_count)
-        for i, row in enumerate(self.data):
+        for i, row in enumerate(data):
             for j, value in enumerate(row.values()):
                 self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
 
     def visualize_data(self):
-        dataVisualization.visualize_data(self.data)
+        # Get the selected month from the calendar widget
+        selected_month = self.calendar.selectedDate().toString('MMMM')
+
+        # Filter the data to only include the selected month
+        data = [row for row in self._data if row['Month'] == selected_month]
+
+        # Extract the category, expense, and spending data from the JSON data
+        categories = [row['Category'] for row in data]
+        expenses = [row['Expense'] for row in data]
+        amounts = [int(row['Allotted']) for row in data]
+        spending = [int(row['Spending']) for row in data]
+
+        # Create a bar chart with the data
+        self.axes.clear()
+        self.axes.barh(expenses, amounts, color='blue')
+        self.axes.barh(expenses, spending, color='red', alpha=0.9)
+        self.axes.set_title(f'{selected_month} Budget')
+        self.axes.set_xlabel('Allotted')
+        self.axes.set_ylabel('Expense')
+        self.axes.set_yticks(expenses)
+        self.axes.set_yticklabels(expenses)
+
+        # Add labels with the amount value to the middle of each bar
+        for x, y in enumerate(amounts):
+            self.axes.text(y + 5, x - 0.4, str(y), color='black', fontweight='bold')
+
+        # Add a label in the middle of each bar with the amount value
+        for i, bar in enumerate(self.axes.containers[0]):
+            height = bar.get_height()
+            self.axes.text(bar.get_x() + bar.get_width() / 2, height / 2, str(height), ha='center', va='bottom')
+
+        # Update the graph on the FigureCanvasQTAgg object
+        self.figure_canvas.draw()
+
+def set_json_data(data_path):
+    with open(data_path, 'r') as jsonfile:
+        return json.load(jsonfile)
 
 
-# Util functions.
 def set_dark_theme():
     # Set the dark theme
     dark_palette = QtGui.QPalette()
@@ -115,11 +179,6 @@ def set_dark_theme():
     dark_palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
     QtWidgets.QApplication.setPalette(dark_palette)
     QtWidgets.QApplication.setStyle('Fusion')
-
-
-def set_json_data(data_path):
-    with open(data_path, 'r') as jsonfile:
-        return json.load(jsonfile)
 
 
 if __name__ == '__main__':
