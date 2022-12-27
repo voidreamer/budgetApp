@@ -1,8 +1,10 @@
 from PySide2 import QtWidgets, QtGui, QtCore
 import json
+import pathlib
 import sys
 from matplotlib import pyplot
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+
 
 
 class BudgetEditorWindow(QtWidgets.QMainWindow):
@@ -12,7 +14,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self._data = set_json_data(data_path)
         self.init_UI()
 
-    def init_UI(self):
+    def init_UI(self):        
+        self.setMinimumSize(1024, 720)
         # Create a calendar widget
         self.calendar = QtWidgets.QCalendarWidget()
         self.calendar.setGridVisible(True)
@@ -38,18 +41,31 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.visualize_button = QtWidgets.QPushButton('Visualize graph')
         self.visualize_button.clicked.connect(self.visualize_data)
 
+        self.table.setMinimumSize(450, 200)
+        self.calendar.setMinimumSize(450, 200)
+        self.table.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.calendar.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+        mainLayout = QtWidgets.QHBoxLayout() 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.calendar)
-        layout.addWidget(self.figure_canvas)
-        layout.addWidget(self.table)
+        layout.addWidget(self.table)        
+        
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.visualize_button)
         layout.addLayout(button_layout)
 
+        mainLayout.addLayout(layout)
+        mainLayout.addWidget(self.figure_canvas)
+
         widget = QtWidgets.QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(mainLayout)
         self.setCentralWidget(widget)
+        
+        # Visualize current month as soon as the app loads.
+        self.visualize_button.click()
         set_dark_theme()
 
     def on_calendar_selection_changed(self):
@@ -153,6 +169,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             height = bar.get_height()
             self.axes.text(bar.get_x() + bar.get_width() / 2, height / 2, str(height), ha='center', va='bottom')
 
+        self.axes.legend()
+        
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
 
@@ -183,6 +201,7 @@ def set_dark_theme():
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    tableEditor = BudgetEditorWindow(data_path='budget.json')
+    data_path_parent = pathlib.Path(__file__).parent
+    tableEditor = BudgetEditorWindow(data_path=data_path_parent / 'budget.json')
     tableEditor.show()
     sys.exit(app.exec_())
