@@ -3,76 +3,6 @@
     "Category": "Housing",
     "Expense": "Rent",
     "Allotted": "2350",
-    "Spending": "2350",
-    "Month": "December"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Utilities",
-    "Allotted": "120",
-    "Spending": "120",
-    "Month": "December"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Phone",
-    "Allotted": "150",
-    "Spending": "150",
-    "Month": "December"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Internet",
-    "Allotted": "120",
-    "Spending": "120",
-    "Month": "December"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Insurance",
-    "Allotted": "30",
-    "Spending": "30",
-    "Month": "December"
-  },
-  {
-    "Category": "Food",
-    "Expense": "Groceries",
-    "Allotted": "1000",
-    "Spending": "500",
-    "Month": "December"
-  },
-  {
-    "Category": "Food",
-    "Expense": "Eating out",
-    "Allotted": "500",
-    "Spending": "400",
-    "Month": "December"
-  },
-  {
-    "Category": "Miscellaneous",
-    "Expense": "Misc",
-    "Allotted": "400",
-    "Spending": "100",
-    "Month": "December"
-  },
-  {
-    "Category": "Entertainment",
-    "Expense": "Entertainment",
-    "Allotted": "200",
-    "Spending": "150",
-    "Month": "December"
-  },
-  {
-    "Category": "Savings",
-    "Expense": "Savings",
-    "Allotted": "1800",
-    "Spending": "1800",
-    "Month": "December"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Rent",
-    "Allotted": "2350",
     "Spending": "0 ",
     "Month": "January"
   },
@@ -121,7 +51,7 @@
   {
     "Category": "Miscellaneous",
     "Expense": "Misc",
-    "Allotted": "400",
+    "Allotted": "100",
     "Spending": "0",
     "Month": "January"
   },
@@ -138,5 +68,75 @@
     "Allotted": "1800",
     "Spending": "0",
     "Month": "January"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2350",
+    "Spending": "0",
+    "Month": "December"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "120",
+    "Spending": "102",
+    "Month": "December"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "150",
+    "Spending": "128",
+    "Month": "December"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Internet",
+    "Allotted": "120",
+    "Spending": "118",
+    "Month": "December"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Insurance",
+    "Allotted": "30",
+    "Spending": "28",
+    "Month": "December"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Groceries",
+    "Allotted": "1000",
+    "Spending": "726",
+    "Month": "December"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Eating out",
+    "Allotted": "500",
+    "Spending": "500",
+    "Month": "December"
+  },
+  {
+    "Category": "Miscellaneous",
+    "Expense": "Misc",
+    "Allotted": "400",
+    "Spending": "2353",
+    "Month": "December"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "Entertainment",
+    "Allotted": "200",
+    "Spending": "156",
+    "Month": "December"
+  },
+  {
+    "Category": "Savings",
+    "Expense": "Savings",
+    "Allotted": "1800",
+    "Spending": "0",
+    "Month": "December"
   }
 ]
