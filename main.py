@@ -4,6 +4,7 @@ import pathlib
 import sys
 from matplotlib import pyplot
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from functools import partial
 
 
 
@@ -22,9 +23,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.calendar.selectionChanged.connect(self.on_calendar_selection_changed)
 
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(4)
+        self.table.setColumnCount(6)
+        self.table.horizontalHeader().setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+        self.table.horizontalHeader().ResizeMode(QtWidgets.QHeaderView.Fixed)
         self.table.setHorizontalHeaderLabels(
-            ['Category', 'Expense', 'Allotted', 'Spending'])
+            ['Category', 'Expense', 'Allotted', 'Spending', 'Comment', 'Btn'])
         self.set_table_data()
 
         self.table.itemChanged.connect(self.set_cell_style)
@@ -41,9 +44,9 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.visualize_button = QtWidgets.QPushButton('Visualize graph')
         self.visualize_button.clicked.connect(self.visualize_data)
 
-        self.table.setMinimumSize(450, 200)
+        self.table.setMinimumSize(450, 250)
         self.calendar.setMinimumSize(450, 200)
-        self.table.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.table.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.calendar.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
@@ -124,6 +127,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         with open(self._data_path, 'w') as jsonfile:
             json.dump(data, jsonfile, indent=2)
 
+
     def set_table_data(self):
         # Get the selected month from the calendar widget
         selected_month = self.calendar.selectedDate().toString('MMMM')
@@ -133,9 +137,65 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         row_count = len(data)
         self.table.setRowCount(row_count)
+        # buttons = []
         for i, row in enumerate(data):
             for j, value in enumerate(row.values()):
-                self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
+                if value==selected_month:
+                    button = self.create_delete_row_btn()
+                    self.table.setCellWidget(i,j,button)
+                    button.clicked.connect(partial(self.del_raw_button_clicked, button))
+                else:
+                    self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
+
+
+    def del_raw_button_clicked(self, btn):
+
+        pos = btn.pos()  
+        index = self.table.indexAt(pos)
+        if index.isValid():
+            # Get the row and column of the cell
+            row = index.row()
+            self.table.removeRow(row)
+
+
+    def create_delete_row_btn(self):
+        # Create a QPixmap with a size of 32x32 pixels
+        pixmap = QtGui.QPixmap(32, 32)
+
+        # Fill the pixmap with a transparent color
+        pixmap.fill(QtGui.QColor(0, 0, 0, 0))
+
+        # Create a QPainter object to draw on the pixmap
+        painter = QtGui.QPainter(pixmap)
+
+        # Set the pen and brush to red
+        painter.setPen(QtGui.QPen(QtGui.QColor(255, 0, 0)))
+        painter.setBrush(QtGui.QBrush(QtGui.QColor(255, 0, 0)))
+
+        # Draw a circle on the pixmap
+        painter.drawEllipse(4, 4, 24, 24)
+        painter.end()
+
+        # Save the pixmap to an image file
+        pixmap.save("icon.png")
+
+        # Create a delete button
+        delete_button = QtWidgets.QPushButton()
+
+        # Set the icon for the delete button
+        delete_button.setIcon(QtGui.QIcon(pixmap))
+
+        # Set the icon size for the delete button
+        delete_button.setIconSize(pixmap.size())
+ 
+        # Set the icon for the button using the style sheet
+        # delete_button.setStyleSheet("background-image: url(icon.png)")
+
+        # Set the size of the button to match the size of the icon
+        delete_button.setFixedSize(pixmap.size())
+
+        return delete_button
+    
 
     def visualize_data(self):
         # Get the selected month from the calendar widget
