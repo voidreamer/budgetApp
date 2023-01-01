@@ -28,7 +28,9 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.table.horizontalHeader().ResizeMode(QtWidgets.QHeaderView.Fixed)
         self.table.setHorizontalHeaderLabels(
             ['Category', 'Expense', 'Allotted', 'Spending', 'Comment', 'Btn'])
+        #self.row_btn=self.add_row_button()
         self.set_table_data()
+        
 
         self.table.itemChanged.connect(self.set_cell_style)
         self.figure, self.axes = pyplot.subplots()
@@ -50,10 +52,13 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.calendar.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
+        self.category_btn = QtWidgets.QPushButton('Add category')
+
         mainLayout = QtWidgets.QHBoxLayout() 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.calendar)
-        layout.addWidget(self.table)        
+        layout.addWidget(self.table)  
+        #layout.addWidget(self.category_btn)      
         
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
@@ -111,9 +116,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         data = [row for row in data if row['Month'] != selected_month]
 
         # Add the new data for the selected month to the data list
-        for i in range(self.table.rowCount()):
+        for i in range(self.table.rowCount()-1):
             row = {}
             for j in range(self.table.columnCount()):
+                if self.table.horizontalHeaderItem(j).text()=='Btn':
+                    continue
                 item = self.table.item(i, j)
                 if item:
                     row[self.table.horizontalHeaderItem(j).text()] = item.text()
@@ -127,8 +134,14 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         with open(self._data_path, 'w') as jsonfile:
             json.dump(data, jsonfile, indent=2)
 
+    
+    def _clear_table_data(self):
+        self.table.setRowCount(0)
+        self.table.setColumnCount(0)
 
     def set_table_data(self):
+        #elf.delete_add_row_btn()
+
         # Get the selected month from the calendar widget
         selected_month = self.calendar.selectedDate().toString('MMMM')
 
@@ -137,18 +150,84 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         row_count = len(data)
         self.table.setRowCount(row_count)
-        # buttons = []
         for i, row in enumerate(data):
             for j, value in enumerate(row.values()):
                 if value==selected_month:
-                    button = self.create_delete_row_btn()
-                    self.table.setCellWidget(i,j,button)
-                    button.clicked.connect(partial(self.del_raw_button_clicked, button))
+                    del_row_btn = self.create_delete_row_btn()
+                    self.table.setCellWidget(i,j,del_row_btn)
+                    del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
                 else:
                     self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
+        
+
+        #here we need to delete all the buttons  add row buttons
+        self.delete_add_row_btn()
+        row_count = self.table.rowCount()
+        self.table.setRowCount(row_count+1)
+        row_btn = self.add_row_button()
+        self.table.setCellWidget(self.table.rowCount()-1, 0, row_btn)
+        row_btn.clicked.connect(self.add_row_button_clicked)
 
 
-    def del_raw_button_clicked(self, btn):
+    def add_row_button_clicked(self):
+        #column_count = self.table.columnCount()
+        row_count = self.table.rowCount()
+        self.table.insertRow(row_count-1)
+        del_row_btn = self.create_delete_row_btn()
+        self.table.setCellWidget(row_count-1,5,del_row_btn)
+        del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
+
+
+    def add_row_button(self):
+        pixmap = QtGui.QPixmap(32, 32)
+
+        # Fill the pixmap with a transparent color
+        pixmap.fill(QtGui.QColor(0, 0, 0, 0))
+
+        # Create a QPainter object to draw on the pixmap
+        painter = QtGui.QPainter(pixmap)
+
+        # Set the pen and brush to red
+        painter.setPen(QtGui.QPen(QtGui.QColor(0, 225, 0)))
+        painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 225, 0)))
+
+        # Draw a circle on the pixmap
+        painter.drawEllipse(4, 4, 24, 24)
+
+        painter.setPen(QtGui.QPen(QtGui.QColor(225, 225, 225)))
+        painter.drawLine(8, 16, 24, 16)
+        painter.drawLine(16, 8, 16, 24)
+        painter.end()
+
+        # Save the pixmap to an image file
+        pixmap.save("icon_green_circle.png")
+
+        row_btn = QtWidgets.QPushButton()
+
+        # Set the icon for the delete button
+        row_btn.setIcon(QtGui.QIcon(pixmap))
+        row_btn.setIconSize(pixmap.size())
+        row_btn.setFixedSize(pixmap.size())
+        
+        return row_btn
+
+    def delete_add_row_btn(self):
+        # Find the widget in the table widget
+        found = False
+        for row in range(self.table.rowCount()):
+        #for col in range(self.table.columnCount()):
+            widget = self.table.cellWidget(row, 0)
+            if isinstance(widget, QtWidgets.QPushButton):
+                #print(f'Widget found at cell ({row}, {col})')
+                self.table.removeCellWidget(row, 0)
+                found = True
+                break
+            if found:
+                break
+        if not found:
+            print('Widget not found in the table widget')
+
+    def del_row_button_clicked(self, btn):
 
         pos = btn.pos()  
         index = self.table.indexAt(pos)
@@ -156,6 +235,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             # Get the row and column of the cell
             row = index.row()
             self.table.removeRow(row)
+        self.table.clearSelection()
 
 
     def create_delete_row_btn(self):
@@ -174,10 +254,14 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         # Draw a circle on the pixmap
         painter.drawEllipse(4, 4, 24, 24)
+
+        painter.setPen(QtGui.QPen(QtGui.QColor(225, 225, 225)))
+        painter.drawLine(8, 16, 24, 16)
+
         painter.end()
 
         # Save the pixmap to an image file
-        pixmap.save("icon.png")
+        pixmap.save("icon_red_circle.png")
 
         # Create a delete button
         delete_button = QtWidgets.QPushButton()

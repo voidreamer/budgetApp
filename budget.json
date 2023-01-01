@@ -3,88 +3,8 @@
     "Category": "Housing",
     "Expense": "Rent",
     "Allotted": "2350",
-    "Spending": "0 ",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Utilities",
-    "Allotted": "120",
     "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Phone",
-    "Allotted": "150",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Internet",
-    "Allotted": "120",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Insurance",
-    "Allotted": "30",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Food",
-    "Expense": "Groceries",
-    "Allotted": "1000",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Food",
-    "Expense": "Eating out",
-    "Allotted": "500",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Miscellaneous",
-    "Expense": "Misc",
-    "Allotted": "100",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Entertainment",
-    "Expense": "Entertainment",
-    "Allotted": "200",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Savings",
-    "Expense": "Savings",
-    "Allotted": "1800",
-    "Spending": "0",
-    "Comment":"",
-    "Month": "January"
-  },
-  {
-    "Category": "Housing",
-    "Expense": "Rent",
-    "Allotted": "2350",
-    "Spending": "0",
-    "Comment":"",
+    "Comment": "",
     "Month": "December"
   },
   {
@@ -92,7 +12,7 @@
     "Expense": "Utilities",
     "Allotted": "120",
     "Spending": "102",
-    "Comment":"",
+    "Comment": "",
     "Month": "December"
   },
   {
@@ -100,7 +20,7 @@
     "Expense": "Phone",
     "Allotted": "150",
     "Spending": "128",
-    "Comment":"",
+    "Comment": "",
     "Month": "December"
   },
   {
@@ -108,7 +28,7 @@
     "Expense": "Internet",
     "Allotted": "120",
     "Spending": "118",
-    "Comment":"",
+    "Comment": "",
     "Month": "December"
   },
   {
@@ -116,7 +36,7 @@
     "Expense": "Insurance",
     "Allotted": "30",
     "Spending": "28",
-    "Comment":"",
+    "Comment": "",
     "Month": "December"
   },
   {
@@ -124,7 +44,7 @@
     "Expense": "Groceries",
     "Allotted": "1000",
     "Spending": "726",
-    "Comment":"",
+    "Comment": "",
     "Month": "December"
   },
   {
@@ -132,7 +52,7 @@
     "Expense": "Eating out",
     "Allotted": "500",
     "Spending": "500",
-    "Comment":"TTTTTTTTTT",
+    "Comment": "TTTTTTTTTT",
     "Month": "December"
   },
   {
@@ -140,7 +60,7 @@
     "Expense": "Misc",
     "Allotted": "400",
     "Spending": "2353",
-    "Comment":"TTTTTTTTT",
+    "Comment": "TTTTTTTTT",
     "Month": "December"
   },
   {
@@ -148,7 +68,7 @@
     "Expense": "Entertainment",
     "Allotted": "200",
     "Spending": "156",
-    "Comment":"TTTTTTTTTTTTTT",
+    "Comment": "TTTTTTTTTTTTTT",
     "Month": "December"
   },
   {
@@ -156,7 +76,63 @@
     "Expense": "Savings",
     "Allotted": "1800",
     "Spending": "0",
-    "Comment":"TTTTTTTTTTTTT",
+    "Comment": "TTTTTTTTTTTTT",
     "Month": "December"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2350",
+    "Spending": "0 ",
+    "Comment": "",
+    "Month": "January"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "",
+    "Month": "January"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "150",
+    "Spending": "0",
+    "Comment": "",
+    "Month": "January"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Eating out",
+    "Allotted": "500",
+    "Spending": "0",
+    "Comment": "",
+    "Month": "January"
+  },
+  {
+    "Category": "Miscellaneous",
+    "Expense": "Misc",
+    "Allotted": "100",
+    "Spending": "0",
+    "Comment": "",
+    "Month": "January"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "Entertainment",
+    "Allotted": "200",
+    "Spending": "0",
+    "Comment": "",
+    "Month": "January"
+  },
+  {
+    "Category": "Savings",
+    "Expense": "Savings",
+    "Allotted": "1800",
+    "Spending": "0",
+    "Comment": "",
+    "Month": "January"
   }
 ]
