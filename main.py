@@ -22,7 +22,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.calendar.setGridVisible(True)
         self.calendar.selectionChanged.connect(self.on_calendar_selection_changed)
 
-        self.table = QtWidgets.QTableWidget()
+        # self.table = QtWidgets.QTableWidget()
+        self.table = TableWidget()
         self.table.setColumnCount(6)
         self.table.horizontalHeader().setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
         self.table.horizontalHeader().ResizeMode(QtWidgets.QHeaderView.Fixed)
@@ -30,7 +31,6 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             ['Category', 'Expense', 'Allotted', 'Spending', 'Comment', 'Btn'])
         #self.row_btn=self.add_row_button()
         self.set_table_data()
-        
 
         self.table.itemChanged.connect(self.set_cell_style)
         self.figure, self.axes = pyplot.subplots()
@@ -341,6 +341,73 @@ def set_dark_theme():
     dark_palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
     QtWidgets.QApplication.setPalette(dark_palette)
     QtWidgets.QApplication.setStyle('Fusion')
+
+
+class TableWidget(QtWidgets.QTableWidget):
+    def __init__(self, *args, **kwargs):
+        super(TableWidget, self).__init__(*args, **kwargs)
+        self.setMouseTracking(True)
+        self.drag_start_row = None
+
+    # def mouseMoveEvent(self, event):
+    #     if event.buttons() == QtCore.Qt.MidButton:
+    #         index = self.indexAt(event.pos())
+    #         if index.isValid():
+    #             self.drag_start_row = index.row()
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.MidButton:
+            index = self.indexAt(event.pos())
+            if self.indexAt(event.pos()):
+                # self.drag_start_position = event.pos()
+                self.drag_start_row = index.row()
+                print('pressed mouse at a row {}'.format(self.drag_start_row))
+        # use built in method editItem() to allow editing as QLineEdit 
+        elif event.button() == QtCore.Qt.LeftButton:
+            item = self.itemAt(event.pos())
+            if item:
+                self.editItem(item)
+
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == QtCore.Qt.MidButton:
+            index = self.indexAt(event.pos())
+            if index.isValid():
+                end_row = index.row()
+                self.moveRow(self.drag_start_row, end_row)
+
+    def moveRow(self, start_row, end_row):
+        num_columns = self.columnCount()
+
+        # Remove the row
+        rowData = []
+        for col in range(num_columns):
+            
+            cellWidget = self.cellWidget(start_row, col)
+            if cellWidget:
+                print(cellWidget.parent())
+                rowData.append(cellWidget)
+                cellWidget.setParent(None)
+                print(cellWidget.parent())
+                self.removeCellWidget(start_row, col)
+            else:
+                rowData.append(self.takeItem(start_row, col))
+        # rowData.append(self.removeRow(start_row))
+        self.removeRow(start_row)
+        # for thing in rowData:
+        #     print (thing)
+
+        # Insert the row at the new position
+        self.insertRow(end_row)
+        for col in range(num_columns):
+            if isinstance(rowData[col], QtWidgets.QPushButton):
+                # print('placing push btn {}'.format(rowData[col]))
+                
+                print ('item we are placing {}'.format(rowData[col]))
+                #self.setCellWidget(end_row, col, rowData[col])
+            else:
+                self.setItem(end_row, col, rowData[col])
+                # print ('placing item {}'.format(rowData[col]))
 
 
 if __name__ == '__main__':
