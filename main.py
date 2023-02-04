@@ -160,7 +160,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                     self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
         
 
-        #here we need to delete all the buttons  add row buttons
+        #here we need to delete all the buttons  dd row buttons
         self.delete_add_row_btn()
         row_count = self.table.rowCount()
         self.table.setRowCount(row_count+1)
@@ -174,6 +174,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         row_count = self.table.rowCount()
         self.table.insertRow(row_count-1)
         del_row_btn = self.create_delete_row_btn()
+        for i in range(0,5):
+            self.table.setItem(row_count-1, i, QtWidgets.QTableWidgetItem(str("0")))
         self.table.setCellWidget(row_count-1,5,del_row_btn)
         del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
 
@@ -359,10 +361,8 @@ class TableWidget(QtWidgets.QTableWidget):
         if event.button() == QtCore.Qt.MidButton:
             index = self.indexAt(event.pos())
             if self.indexAt(event.pos()):
-                # self.drag_start_position = event.pos()
                 self.drag_start_row = index.row()
-                print('pressed mouse at a row {}'.format(self.drag_start_row))
-        # use built in method editItem() to allow editing as QLineEdit 
+                self.selectRow(self.drag_start_row)
         elif event.button() == QtCore.Qt.LeftButton:
             item = self.itemAt(event.pos())
             if item:
@@ -377,37 +377,27 @@ class TableWidget(QtWidgets.QTableWidget):
                 self.moveRow(self.drag_start_row, end_row)
 
     def moveRow(self, start_row, end_row):
-        num_columns = self.columnCount()
-
-        # Remove the row
-        rowData = []
-        for col in range(num_columns):
-            
-            cellWidget = self.cellWidget(start_row, col)
-            if cellWidget:
-                print(cellWidget.parent())
-                rowData.append(cellWidget)
-                cellWidget.setParent(None)
-                print(cellWidget.parent())
-                self.removeCellWidget(start_row, col)
-            else:
-                rowData.append(self.takeItem(start_row, col))
-        # rowData.append(self.removeRow(start_row))
-        self.removeRow(start_row)
-        # for thing in rowData:
-        #     print (thing)
-
-        # Insert the row at the new position
+        if start_row>end_row:
+            start_row=start_row+1
+        else:
+            end_row=end_row+1
+        # Insert the row at the new position and place empty treewidgetitems there
         self.insertRow(end_row)
-        for col in range(num_columns):
-            if isinstance(rowData[col], QtWidgets.QPushButton):
-                # print('placing push btn {}'.format(rowData[col]))
-                
-                print ('item we are placing {}'.format(rowData[col]))
-                #self.setCellWidget(end_row, col, rowData[col])
-            else:
-                self.setItem(end_row, col, rowData[col])
-                # print ('placing item {}'.format(rowData[col]))
+        num_columns = self.columnCount()
+        for col in range(num_columns-1):
+            self.setItem(end_row, col, QtWidgets.QTableWidgetItem(str("0")))
+
+        for  col in range(num_columns-1):
+            #just swap data to the newly inserted row and 
+            cur_item = self.takeItem(start_row, col)
+            self.setItem(end_row, col, cur_item)
+
+        cellWidget = self.cellWidget(start_row, num_columns-1)
+        if cellWidget:
+            cellWidget.setParent(None)
+            self.setCellWidget(end_row, num_columns-1, cellWidget)
+
+        self.removeRow(start_row)
 
 
 if __name__ == '__main__':
