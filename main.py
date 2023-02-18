@@ -7,16 +7,23 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from functools import partial
 
 
-
 class BudgetEditorWindow(QtWidgets.QMainWindow):
     def __init__(self, data_path):
         super().__init__()
         self._data_path = data_path
         self._data = set_json_data(data_path)
         self.init_UI()
+        self.setStyleSheet("""
+            QPushButton{
+                border: 0;
+                background-color: #222222;
+                padding: 15px;
+            }
+            
+        """)
 
-    def init_UI(self):        
-        self.setMinimumSize(1024, 720)
+    def init_UI(self):
+        self.setMinimumSize(1280, 720)
         # Create a calendar widget
         self.calendar = QtWidgets.QCalendarWidget()
         self.calendar.setGridVisible(True)
@@ -29,7 +36,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.table.horizontalHeader().ResizeMode(QtWidgets.QHeaderView.Fixed)
         self.table.setHorizontalHeaderLabels(
             ['Category', 'Expense', 'Allotted', 'Spending', 'Comment', 'Btn'])
-        #self.row_btn=self.add_row_button()
+        # self.row_btn=self.add_row_button()
         self.set_table_data()
 
         self.table.itemChanged.connect(self.set_cell_style)
@@ -37,6 +44,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         # Create a FigureCanvasQTAgg object to display the figure
         self.figure_canvas = FigureCanvasQTAgg(self.figure)
+        self.figure.set_facecolor("#222222")
 
         # Create a button to save the table data to the loaded json file.
         self.save_button = QtWidgets.QPushButton('Save')
@@ -49,17 +57,17 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.table.setMinimumSize(450, 250)
         self.calendar.setMinimumSize(450, 200)
         self.table.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.calendar.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.calendar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.category_btn = QtWidgets.QPushButton('Add category')
 
-        mainLayout = QtWidgets.QHBoxLayout() 
+        mainLayout = QtWidgets.QHBoxLayout()
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.calendar)
-        layout.addWidget(self.table)  
-        #layout.addWidget(self.category_btn)      
-        
+        layout.addWidget(self.table)
+        # layout.addWidget(self.category_btn)
+
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.visualize_button)
@@ -71,114 +79,20 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         widget = QtWidgets.QWidget()
         widget.setLayout(mainLayout)
         self.setCentralWidget(widget)
-        
+
         # Visualize current month as soon as the app loads.
         self.visualize_button.click()
         set_dark_theme()
 
-    def on_calendar_selection_changed(self):
-        # Update the table data when the calendar selection changes
-        print(f'month : {self.calendar.selectedDate().toString("MMMM")}')
-        self._data = self.get_data_for_month(self.calendar.selectedDate().toString("MMMM"))
-        self.set_table_data()
-
-    def get_data_for_month(self, month):
-        # Return the data for the specified month from the JSON file
-        with open(self._data_path, 'r') as jsonfile:
-            data = json.load(jsonfile)
-        return [row for row in data if row['Month'] == month]
-
-    def set_cell_style(self, item):
-        # Set the cell style based on the values in the "Spending" and "Allotted" columns
-        if item.column() == 3:  # Check if the changed item is in the "Spending" column
-            # Get the value in the "Allotted" column for the same row
-            amount = self.table.item(item.row(), 2)
-            if amount:
-                # If the value in the "Spending" column is greater than the value in the "Allotted" column,
-                # set the cell text color to white and the cell background color to red
-                if int(item.text()) > int(amount.text()):
-                    item.setForeground(QtGui.QColor('white'))
-                    item.setBackground(QtGui.QColor('red'))
-                # Otherwise, set the cell text color to black and the cell background color to white
-                else:
-                    item.setForeground(QtGui.QColor('black'))
-                    item.setBackground(QtGui.QColor('white'))
-
-    def save_table_data(self):
-        # Read the JSON file and store the data in a list
-        with open(self._data_path, 'r') as jsonfile:
-            data = json.load(jsonfile)
-
-        # Get the selected month from the calendar widget
-        selected_month = self.calendar.selectedDate().toString("MMMM")
-
-        # Remove the existing data for the selected month from the data list
-        data = [row for row in data if row['Month'] != selected_month]
-
-        # Add the new data for the selected month to the data list
-        for i in range(self.table.rowCount()-1):
-            row = {}
-            for j in range(self.table.columnCount()):
-                if self.table.horizontalHeaderItem(j).text()=='Btn':
-                    continue
-                item = self.table.item(i, j)
-                if item:
-                    row[self.table.horizontalHeaderItem(j).text()] = item.text()
-                else:
-                    row[self.table.horizontalHeaderItem(j).text()] = ''
-            # Add the selected month to the row data
-            row['Month'] = selected_month
-            data.append(row)
-
-        # Write the data to the JSON file
-        with open(self._data_path, 'w') as jsonfile:
-            json.dump(data, jsonfile, indent=2)
-
-    
-    def _clear_table_data(self):
-        self.table.setRowCount(0)
-        self.table.setColumnCount(0)
-
-    def set_table_data(self):
-        #elf.delete_add_row_btn()
-
-        # Get the selected month from the calendar widget
-        selected_month = self.calendar.selectedDate().toString('MMMM')
-
-        # Filter the data to only include the selected month
-        data = [row for row in self._data if row['Month'] == selected_month]
-
-        row_count = len(data)
-        self.table.setRowCount(row_count)
-        for i, row in enumerate(data):
-            for j, value in enumerate(row.values()):
-                if value==selected_month:
-                    del_row_btn = self.create_delete_row_btn()
-                    self.table.setCellWidget(i,j,del_row_btn)
-                    del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
-                else:
-                    self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
-        
-
-        #here we need to delete all the buttons  dd row buttons
-        self.delete_add_row_btn()
-        row_count = self.table.rowCount()
-        self.table.setRowCount(row_count+1)
-        row_btn = self.add_row_button()
-        self.table.setCellWidget(self.table.rowCount()-1, 0, row_btn)
-        row_btn.clicked.connect(self.add_row_button_clicked)
-
-
     def add_row_button_clicked(self):
-        #column_count = self.table.columnCount()
+        # column_count = self.table.columnCount()
         row_count = self.table.rowCount()
-        self.table.insertRow(row_count-1)
+        self.table.insertRow(row_count - 1)
         del_row_btn = self.create_delete_row_btn()
-        for i in range(0,5):
-            self.table.setItem(row_count-1, i, QtWidgets.QTableWidgetItem(str("0")))
-        self.table.setCellWidget(row_count-1,5,del_row_btn)
+        for i in range(0, 5):
+            self.table.setItem(row_count - 1, i, QtWidgets.QTableWidgetItem(str("0")))
+        self.table.setCellWidget(row_count - 1, 5, del_row_btn)
         del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
-
 
     def add_row_button(self):
         pixmap = QtGui.QPixmap(32, 32)
@@ -210,35 +124,12 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         row_btn.setIcon(QtGui.QIcon(pixmap))
         row_btn.setIconSize(pixmap.size())
         row_btn.setFixedSize(pixmap.size())
-        
+
         return row_btn
 
-    def delete_add_row_btn(self):
-        # Find the widget in the table widget
-        found = False
-        for row in range(self.table.rowCount()):
-        #for col in range(self.table.columnCount()):
-            widget = self.table.cellWidget(row, 0)
-            if isinstance(widget, QtWidgets.QPushButton):
-                #print(f'Widget found at cell ({row}, {col})')
-                self.table.removeCellWidget(row, 0)
-                found = True
-                break
-            if found:
-                break
-        if not found:
-            print('Widget not found in the table widget')
-
-    def del_row_button_clicked(self, btn):
-
-        pos = btn.pos()  
-        index = self.table.indexAt(pos)
-        if index.isValid():
-            # Get the row and column of the cell
-            row = index.row()
-            self.table.removeRow(row)
-        self.table.clearSelection()
-
+    def _clear_table_data(self):
+        self.table.setRowCount(0)
+        self.table.setColumnCount(0)
 
     def create_delete_row_btn(self):
         # Create a QPixmap with a size of 32x32 pixels
@@ -273,7 +164,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         # Set the icon size for the delete button
         delete_button.setIconSize(pixmap.size())
- 
+
         # Set the icon for the button using the style sheet
         # delete_button.setStyleSheet("background-image: url(icon.png)")
 
@@ -281,7 +172,119 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         delete_button.setFixedSize(pixmap.size())
 
         return delete_button
-    
+
+    def delete_add_row_btn(self):
+        # Find the widget in the table widget
+        found = False
+        for row in range(self.table.rowCount()):
+            # for col in range(self.table.columnCount()):
+            widget = self.table.cellWidget(row, 0)
+            if isinstance(widget, QtWidgets.QPushButton):
+                # print(f'Widget found at cell ({row}, {col})')
+                self.table.removeCellWidget(row, 0)
+                found = True
+                break
+            if found:
+                break
+        if not found:
+            print('Widget not found in the table widget')
+
+    def del_row_button_clicked(self, btn):
+
+        pos = btn.pos()
+        index = self.table.indexAt(pos)
+        if index.isValid():
+            # Get the row and column of the cell
+            row = index.row()
+            self.table.removeRow(row)
+        self.table.clearSelection()
+
+    def on_calendar_selection_changed(self):
+        # Update the table data when the calendar selection changes
+        print(f'month : {self.calendar.selectedDate().toString("MMMM")}')
+        self._data = self.get_data_for_month(self.calendar.selectedDate().toString("MMMM"))
+        self.set_table_data()
+
+    def get_data_for_month(self, month):
+        # Return the data for the specified month from the JSON file
+        with open(self._data_path, 'r') as jsonfile:
+            data = json.load(jsonfile)
+        return [row for row in data if row['Month'] == month]
+
+    def set_cell_style(self, item):
+        # Set the cell style based on the values in the "Spending" and "Allotted" columns
+        if item.column() == 3:  # Check if the changed item is in the "Spending" column
+            # Get the value in the "Allotted" column for the same row
+            amount = self.table.item(item.row(), 2)
+            if not amount:
+                return
+            # If the value in the "Spending" column is greater than the value in the "Allotted" column,
+            # set the cell text color to white and the cell background color to red
+            if int(item.text()) > int(amount.text()):
+                item.setForeground(QtGui.QColor('#333333'))
+                item.setBackground(QtGui.QColor('red'))
+            # Otherwise, set the cell text color to black and the cell background color to white
+            else:
+                item.setForeground(QtGui.QColor('black'))
+                item.setBackground(QtGui.QColor('white'))
+
+    def save_table_data(self):
+        # Read the JSON file and store the data in a list
+        with open(self._data_path, 'r') as jsonfile:
+            data = json.load(jsonfile)
+
+        # Get the selected month from the calendar widget
+        selected_month = self.calendar.selectedDate().toString("MMMM")
+
+        # Remove the existing data for the selected month from the data list
+        data = [row for row in data if row['Month'] != selected_month]
+
+        # Add the new data for the selected month to the data list
+        for i in range(self.table.rowCount() - 1):
+            row = {}
+            for j in range(self.table.columnCount()):
+                if self.table.horizontalHeaderItem(j).text() == 'Btn':
+                    continue
+                item = self.table.item(i, j)
+                if item:
+                    row[self.table.horizontalHeaderItem(j).text()] = item.text()
+                else:
+                    row[self.table.horizontalHeaderItem(j).text()] = ''
+            # Add the selected month to the row data
+            row['Month'] = selected_month
+            data.append(row)
+
+        # Write the data to the JSON file
+        with open(self._data_path, 'w') as jsonfile:
+            json.dump(data, jsonfile, indent=2)
+
+    def set_table_data(self):
+        # elf.delete_add_row_btn()
+
+        # Get the selected month from the calendar widget
+        selected_month = self.calendar.selectedDate().toString('MMMM')
+
+        # Filter the data to only include the selected month
+        data = [row for row in self._data if row['Month'] == selected_month]
+
+        row_count = len(data)
+        self.table.setRowCount(row_count)
+        for i, row in enumerate(data):
+            for j, value in enumerate(row.values()):
+                if value == selected_month:
+                    del_row_btn = self.create_delete_row_btn()
+                    self.table.setCellWidget(i, j, del_row_btn)
+                    del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
+                else:
+                    self.table.setItem(i, j, QtWidgets.QTableWidgetItem(str(value)))
+
+        # here we need to delete all the buttons  dd row buttons
+        self.delete_add_row_btn()
+        row_count = self.table.rowCount()
+        self.table.setRowCount(row_count + 1)
+        row_btn = self.add_row_button()
+        self.table.setCellWidget(self.table.rowCount() - 1, 0, row_btn)
+        row_btn.clicked.connect(self.add_row_button_clicked)
 
     def visualize_data(self):
         # Get the selected month from the calendar widget
@@ -298,27 +301,102 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         # Create a bar chart with the data
         self.axes.clear()
-        self.axes.barh(expenses, amounts, color='blue')
-        self.axes.barh(expenses, spending, color='red', alpha=0.9)
+        self.axes.set_facecolor('#222222')
+        self.axes.barh(expenses, amounts, color='#444444')
+        self.axes.barh(expenses, spending, color='#FF3333', alpha=0.9)
         self.axes.set_title(f'{selected_month} Budget')
         self.axes.set_xlabel('Allotted')
         self.axes.set_ylabel('Expense')
         self.axes.set_yticks(expenses)
         self.axes.set_yticklabels(expenses)
+        self.axes.xaxis.label.set_color('white')
+        self.axes.yaxis.label.set_color('white')
+        self.axes.title.set_color('white')
+        self.axes.tick_params(axis='x', colors='white')
+        self.axes.tick_params(axis='y', colors='white')
+        self.axes.spines['top'].set_color('white')
+        self.axes.spines['bottom'].set_color('white')
+        self.axes.spines['left'].set_color('white')
+        self.axes.spines['right'].set_color('white')
 
         # Add labels with the amount value to the middle of each bar
         for x, y in enumerate(amounts):
-            self.axes.text(y + 5, x - 0.4, str(y), color='black', fontweight='bold')
+            self.axes.text(y + 5, x - 0.4, str(y), color='#CCCCCC', fontweight='bold')
 
+        '''
         # Add a label in the middle of each bar with the amount value
         for i, bar in enumerate(self.axes.containers[0]):
             height = bar.get_height()
             self.axes.text(bar.get_x() + bar.get_width() / 2, height / 2, str(height), ha='center', va='bottom')
+        '''
 
         self.axes.legend()
-        
+
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
+
+
+class TableWidget(QtWidgets.QTableWidget):
+    def __init__(self, *args, **kwargs):
+        super(TableWidget, self).__init__(*args, **kwargs)
+        self.setMouseTracking(True)
+        self.drag_start_row = None
+        self.setStyleSheet("""
+            QTableWidget{
+                background-color: #222222;
+                padding: 10px;
+                font-size: 14px;
+                font-family: "Source Sans Pro"
+            }
+        """)
+
+    # def mouseMoveEvent(self, event):
+    #     if event.buttons() == QtCore.Qt.MidButton:
+    #         index = self.indexAt(event.pos())
+    #         if index.isValid():
+    #             self.drag_start_row = index.row()
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.MidButton:
+            index = self.indexAt(event.pos())
+            if self.indexAt(event.pos()):
+                self.drag_start_row = index.row()
+                self.selectRow(self.drag_start_row)
+        elif event.button() == QtCore.Qt.LeftButton:
+            item = self.itemAt(event.pos())
+            if item:
+                self.editItem(item)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == QtCore.Qt.MidButton:
+            index = self.indexAt(event.pos())
+            if index.isValid():
+                end_row = index.row()
+                self.moveRow(self.drag_start_row, end_row)
+
+    def moveRow(self, start_row, end_row):
+        if start_row > end_row:
+            start_row = start_row + 1
+        else:
+            end_row = end_row + 1
+        # Insert the row at the new position and place empty treewidgetitems there
+        self.insertRow(end_row)
+        num_columns = self.columnCount()
+        for col in range(num_columns - 1):
+            self.setItem(end_row, col, QtWidgets.QTableWidgetItem(str("0")))
+
+        for col in range(num_columns - 1):
+            # just swap data to the newly inserted row and
+            cur_item = self.takeItem(start_row, col)
+            self.setItem(end_row, col, cur_item)
+
+        cellWidget = self.cellWidget(start_row, num_columns - 1)
+        if cellWidget:
+            cellWidget.setParent(None)
+            self.setCellWidget(end_row, num_columns - 1, cellWidget)
+
+        self.removeRow(start_row)
+
 
 def set_json_data(data_path):
     with open(data_path, 'r') as jsonfile:
@@ -343,61 +421,6 @@ def set_dark_theme():
     dark_palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
     QtWidgets.QApplication.setPalette(dark_palette)
     QtWidgets.QApplication.setStyle('Fusion')
-
-
-class TableWidget(QtWidgets.QTableWidget):
-    def __init__(self, *args, **kwargs):
-        super(TableWidget, self).__init__(*args, **kwargs)
-        self.setMouseTracking(True)
-        self.drag_start_row = None
-
-    # def mouseMoveEvent(self, event):
-    #     if event.buttons() == QtCore.Qt.MidButton:
-    #         index = self.indexAt(event.pos())
-    #         if index.isValid():
-    #             self.drag_start_row = index.row()
-
-    def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.MidButton:
-            index = self.indexAt(event.pos())
-            if self.indexAt(event.pos()):
-                self.drag_start_row = index.row()
-                self.selectRow(self.drag_start_row)
-        elif event.button() == QtCore.Qt.LeftButton:
-            item = self.itemAt(event.pos())
-            if item:
-                self.editItem(item)
-
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == QtCore.Qt.MidButton:
-            index = self.indexAt(event.pos())
-            if index.isValid():
-                end_row = index.row()
-                self.moveRow(self.drag_start_row, end_row)
-
-    def moveRow(self, start_row, end_row):
-        if start_row>end_row:
-            start_row=start_row+1
-        else:
-            end_row=end_row+1
-        # Insert the row at the new position and place empty treewidgetitems there
-        self.insertRow(end_row)
-        num_columns = self.columnCount()
-        for col in range(num_columns-1):
-            self.setItem(end_row, col, QtWidgets.QTableWidgetItem(str("0")))
-
-        for  col in range(num_columns-1):
-            #just swap data to the newly inserted row and 
-            cur_item = self.takeItem(start_row, col)
-            self.setItem(end_row, col, cur_item)
-
-        cellWidget = self.cellWidget(start_row, num_columns-1)
-        if cellWidget:
-            cellWidget.setParent(None)
-            self.setCellWidget(end_row, num_columns-1, cellWidget)
-
-        self.removeRow(start_row)
 
 
 if __name__ == '__main__':
