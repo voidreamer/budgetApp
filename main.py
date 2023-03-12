@@ -18,6 +18,14 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                 border: 0;
                 background-color: #222222;
                 padding: 15px;
+                border-radius: 15px;
+            }
+            QPushButton::hover{
+                border: 2px solid;
+                border-color: #0492C2;
+            }
+            QPushButton::pressed{
+                background-color: #0492C2;
             }
             
         """)
@@ -54,6 +62,9 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.visualize_button = QtWidgets.QPushButton('Visualize graph')
         self.visualize_button.clicked.connect(self.visualize_data)
 
+        self.add_transaction_button = QtWidgets.QPushButton('Add transaction')
+        self.add_transaction_button.clicked.connect(self.show_add_transaction_popup)
+
         self.table.setMinimumSize(450, 250)
         self.calendar.setMinimumSize(450, 200)
         self.table.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -70,6 +81,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
+        button_layout.addWidget(self.add_transaction_button)
         button_layout.addWidget(self.visualize_button)
         layout.addLayout(button_layout)
 
@@ -126,6 +138,42 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         row_btn.setFixedSize(pixmap.size())
 
         return row_btn
+
+    def add_transaction(self, transaction_value, popup_instance):
+        selected_row = self.table.currentRow()
+        try:
+            current_value = int(self.table.item(selected_row, 3).text())
+        except AttributeError as e:
+            popup_instance.accept()
+            dialog = QtWidgets.QDialog(self)
+            layout = QtWidgets.QHBoxLayout()
+            layout.addWidget(QtWidgets.QLabel("Incorrect selection, select a row from the table"))
+            dialog.setLayout(layout)
+            dialog.exec_()
+
+            return
+
+        new_value = current_value + int(transaction_value)
+        self.table.item(selected_row, 3).setText(str(new_value))
+
+        popup_instance.accept()
+
+    def show_add_transaction_popup(self):
+        popup = QtWidgets.QDialog(self)
+        popup.setWindowTitle("Add transaction")
+
+        input_text = QtWidgets.QLineEdit(popup)
+        input_text.setPlaceholderText("Enter amount")
+
+        add_button = QtWidgets.QPushButton("Add transaction", popup)
+        add_button.clicked.connect(lambda: self.add_transaction(input_text.text(), popup))
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(input_text)
+        layout.addWidget(add_button)
+
+        popup.setLayout(layout)
+        popup.exec_()
 
     def _clear_table_data(self):
         self.table.setRowCount(0)
