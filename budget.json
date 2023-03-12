@@ -134,5 +134,85 @@
     "Spending": "0",
     "Comment": "",
     "Month": "December"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2350",
+    "Spending": "2359",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "120",
+    "Spending": "106",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "150",
+    "Spending": "110",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Internet",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Housing ",
+    "Expense": "Insurance",
+    "Allotted": "30",
+    "Spending": "28",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Groceries",
+    "Allotted": "1000",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Eating Out",
+    "Allotted": "500",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "Misc Needs",
+    "Allotted": "400",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "Misc",
+    "Allotted": "200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "February"
+  },
+  {
+    "Category": "Legal",
+    "Expense": "Driving",
+    "Allotted": "700",
+    "Spending": "110",
+    "Comment": "0",
+    "Month": "February"
   }
 ]
