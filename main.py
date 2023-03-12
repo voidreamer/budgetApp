@@ -1,3 +1,7 @@
+import uuid
+from dataclasses import dataclass, field
+from typing import List, Dict
+
 from PySide2 import QtWidgets, QtGui, QtCore
 import json
 import pathlib
@@ -5,6 +9,28 @@ import sys
 from matplotlib import pyplot
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from functools import partial
+
+# TODO separate logic from UI in two modules.
+
+
+@dataclass
+class Transaction:
+    id: str
+    category: str
+    expense: str
+    amount: float
+    alloted: float
+    comment: str
+
+
+@dataclass
+class Budget:
+    transactions: List[Transaction] = field(default_factory=list)
+
+    def add_new_transaction(self, category: str, expense: str, amount: float, alloted: float, comment: str) -> None:
+        transaction_id = str(uuid.uuid4())
+        transaction = Transaction(transaction_id, category, expense, amount, alloted, comment)
+        self.transactions.append(transaction)
 
 
 class BudgetEditorWindow(QtWidgets.QMainWindow):
@@ -29,6 +55,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             }
             
         """)
+        self.budget = Budget()
 
     def init_UI(self):
         self.setMinimumSize(1280, 720)
@@ -139,10 +166,10 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         return row_btn
 
-    def add_transaction(self, transaction_value, popup_instance):
+    def add_transaction(self, transaction_value: str, transaction_comment: str, popup_instance: QtCore.QObject) -> None:
         selected_row = self.table.currentRow()
         try:
-            current_value = int(self.table.item(selected_row, 3).text())
+            current_value = float(self.table.item(selected_row, 3).text())
         except AttributeError as e:
             popup_instance.accept()
             dialog = QtWidgets.QDialog(self)
@@ -153,26 +180,57 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
             return
 
-        new_value = current_value + int(transaction_value)
+        category = self.table.item(selected_row, 0).text()
+        expense = self.table.item(selected_row, 1).text()
+        alloted = self.table.item(selected_row, 2).text()
+        spending = self.table.item(selected_row, 3).text()
+        comment = self.table.item(selected_row, 4).text()
+
+        new_value = current_value + float(transaction_value)
         self.table.item(selected_row, 3).setText(str(new_value))
+
+        self.budget.add_new_transaction(category, expense, float(transaction_value), alloted, transaction_comment)
 
         popup_instance.accept()
 
     def show_add_transaction_popup(self):
         popup = QtWidgets.QDialog(self)
         popup.setWindowTitle("Add transaction")
+        popup.setMinimumWidth(1000)
 
         input_text = QtWidgets.QLineEdit(popup)
         input_text.setPlaceholderText("Enter amount")
 
+        transaction_comment = QtWidgets.QLineEdit(popup)
+        transaction_comment.setPlaceholderText("Description...")
+
+        tableLayout = QtWidgets.QVBoxLayout()
+        historyTable = QtWidgets.QTableWidget()
+        historyTable.setColumnCount(5)
+        historyTable.setRowCount(len(self.budget.transactions))
+        historyTable.setHorizontalHeaderLabels(["category", "Expense", "Spending", "Alloted", "Comment"])
+        tableLayout.addWidget(historyTable)
+
         add_button = QtWidgets.QPushButton("Add transaction", popup)
-        add_button.clicked.connect(lambda: self.add_transaction(input_text.text(), popup))
+        add_button.clicked.connect(lambda: self.add_transaction(input_text.text(), transaction_comment.text(), popup))
 
-        layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(input_text)
-        layout.addWidget(add_button)
+        # Add data to the table .
+        for row, transaction in enumerate(self.budget.transactions):
+            historyTable.setItem(row, 0, QtWidgets.QTableWidgetItem(transaction.category))
+            historyTable.setItem(row, 1, QtWidgets.QTableWidgetItem(transaction.expense))
+            historyTable.setItem(row, 2, QtWidgets.QTableWidgetItem(str(transaction.amount)))
+            historyTable.setItem(row, 3, QtWidgets.QTableWidgetItem(str(transaction.alloted)))
+            historyTable.setItem(row, 4, QtWidgets.QTableWidgetItem(transaction.comment))
 
-        popup.setLayout(layout)
+        main_layout = QtWidgets.QVBoxLayout()
+        input_layout = QtWidgets.QHBoxLayout()
+        input_layout.addWidget(input_text)
+        input_layout.addWidget(transaction_comment)
+        input_layout.addWidget(add_button)
+        main_layout.addLayout(input_layout)
+        main_layout.addLayout(tableLayout)
+
+        popup.setLayout(main_layout)
         popup.exec_()
 
     def _clear_table_data(self):
@@ -268,7 +326,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                 return
             # If the value in the "Spending" column is greater than the value in the "Allotted" column,
             # set the cell text color to white and the cell background color to red
-            if int(item.text()) > int(amount.text()):
+            if float(item.text()) > float(amount.text()):
                 item.setForeground(QtGui.QColor('#333333'))
                 item.setBackground(QtGui.QColor('red'))
             # Otherwise, set the cell text color to black and the cell background color to white
@@ -344,8 +402,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Extract the category, expense, and spending data from the JSON data
         categories = [row['Category'] for row in data]
         expenses = [row['Expense'] for row in data]
-        amounts = [int(row['Allotted']) for row in data]
-        spending = [int(row['Spending']) for row in data]
+        amounts = [float(row['Allotted']) for row in data]
+        spending = [float(row['Spending']) for row in data]
 
         # Create a bar chart with the data
         self.axes.clear()
