@@ -323,7 +323,7 @@
     "Category": "Housing",
     "Expense": "Rent",
     "Allotted": "2360",
-    "Spending": "0",
+    "Spending": "2359.0",
     "Comment": "0",
     "Month": "April"
   },
@@ -331,7 +331,7 @@
     "Category": "Housing",
     "Expense": "Utilities",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "106.99000000000001",
     "Comment": "0",
     "Month": "April"
   },
@@ -339,7 +339,7 @@
     "Category": "Housing",
     "Expense": "Phone",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "114.18",
     "Comment": "0",
     "Month": "April"
   },
@@ -347,7 +347,7 @@
     "Category": "Housing",
     "Expense": "Internet",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "120.90",
     "Comment": "0",
     "Month": "April"
   },
@@ -355,7 +355,7 @@
     "Category": "Housing",
     "Expense": "Insurance",
     "Allotted": "30",
-    "Spending": "0",
+    "Spending": "27.46",
     "Comment": "0",
     "Month": "April"
   },
@@ -371,7 +371,7 @@
     "Category": "Food",
     "Expense": "Groceries",
     "Allotted": "1000",
-    "Spending": "0",
+    "Spending": "965.37",
     "Comment": "0",
     "Month": "April"
   },
@@ -379,7 +379,7 @@
     "Category": "Food",
     "Expense": "Eating Out",
     "Allotted": "500",
-    "Spending": "0",
+    "Spending": "627.61",
     "Comment": "0",
     "Month": "April"
   },
@@ -387,7 +387,7 @@
     "Category": "Entertainment",
     "Expense": "Entertainment",
     "Allotted": "200",
-    "Spending": "0",
+    "Spending": "187.91",
     "Comment": "0",
     "Month": "April"
   },
@@ -403,7 +403,7 @@
     "Category": "Misc",
     "Expense": "Misc",
     "Allotted": "200",
-    "Spending": "0",
+    "Spending": "454.55",
     "Comment": "0",
     "Month": "April"
   },
@@ -411,7 +411,7 @@
     "Category": "Misc",
     "Expense": "Beauty",
     "Allotted": "100",
-    "Spending": "0",
+    "Spending": "230.89000000000001",
     "Comment": "0",
     "Month": "April"
   },
@@ -419,8 +419,120 @@
     "Category": "Misc",
     "Expense": "Vitamins",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "93.77",
     "Comment": "0",
     "Month": "April"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2360",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Internet",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Housing ",
+    "Expense": "Insurance",
+    "Allotted": "30",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Transportation",
+    "Expense": "TTC",
+    "Allotted": "80",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Groceries",
+    "Allotted": "1000",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Eating out",
+    "Allotted": "500",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Food",
+    "Expense": "Vitamins",
+    "Allotted": "100",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "200",
+    "Allotted": "0",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "Clothing",
+    "Allotted": "300",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "Misc",
+    "Allotted": "300",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "Beauty",
+    "Allotted": "50",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
+  },
+  {
+    "Category": "Health",
+    "Expense": "Doctors",
+    "Allotted": "100",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "May"
   }
 ]
