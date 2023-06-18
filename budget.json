@@ -427,7 +427,7 @@
     "Category": "Housing",
     "Expense": "Rent",
     "Allotted": "2360",
-    "Spending": "0",
+    "Spending": "2359.0",
     "Comment": "0",
     "Month": "May"
   },
@@ -435,7 +435,7 @@
     "Category": "Housing",
     "Expense": "Utilities",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "100.86",
     "Comment": "0",
     "Month": "May"
   },
@@ -443,7 +443,7 @@
     "Category": "Housing",
     "Expense": "Phone",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "110.29",
     "Comment": "0",
     "Month": "May"
   },
@@ -451,7 +451,7 @@
     "Category": "Housing",
     "Expense": "Internet",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "120.9",
     "Comment": "0",
     "Month": "May"
   },
@@ -459,7 +459,7 @@
     "Category": "Housing ",
     "Expense": "Insurance",
     "Allotted": "30",
-    "Spending": "0",
+    "Spending": "27.46",
     "Comment": "0",
     "Month": "May"
   },
@@ -467,7 +467,7 @@
     "Category": "Transportation",
     "Expense": "TTC",
     "Allotted": "80",
-    "Spending": "0",
+    "Spending": "117.27",
     "Comment": "0",
     "Month": "May"
   },
@@ -475,7 +475,7 @@
     "Category": "Food",
     "Expense": "Groceries",
     "Allotted": "1000",
-    "Spending": "0",
+    "Spending": "1102.3300000000002",
     "Comment": "0",
     "Month": "May"
   },
@@ -483,7 +483,7 @@
     "Category": "Food",
     "Expense": "Eating out",
     "Allotted": "500",
-    "Spending": "0",
+    "Spending": "725.13",
     "Comment": "0",
     "Month": "May"
   },
@@ -491,15 +491,15 @@
     "Category": "Food",
     "Expense": "Vitamins",
     "Allotted": "100",
-    "Spending": "0",
+    "Spending": "190.56",
     "Comment": "0",
     "Month": "May"
   },
   {
     "Category": "Entertainment",
-    "Expense": "200",
-    "Allotted": "0",
-    "Spending": "0",
+    "Expense": "Misc",
+    "Allotted": "200",
+    "Spending": "152.16",
     "Comment": "0",
     "Month": "May"
   },
@@ -507,7 +507,7 @@
     "Category": "Misc",
     "Expense": "Clothing",
     "Allotted": "300",
-    "Spending": "0",
+    "Spending": "446.84",
     "Comment": "0",
     "Month": "May"
   },
@@ -515,7 +515,7 @@
     "Category": "Misc",
     "Expense": "Misc",
     "Allotted": "300",
-    "Spending": "0",
+    "Spending": "410.92",
     "Comment": "0",
     "Month": "May"
   },
@@ -523,7 +523,7 @@
     "Category": "Misc",
     "Expense": "Beauty",
     "Allotted": "50",
-    "Spending": "0",
+    "Spending": "40.0",
     "Comment": "0",
     "Month": "May"
   },
@@ -531,8 +531,144 @@
     "Category": "Health",
     "Expense": "Doctors",
     "Allotted": "100",
-    "Spending": "0",
+    "Spending": "64.4",
     "Comment": "0",
     "Month": "May"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2360",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Internet",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "110",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Insurance",
+    "Allotted": "30",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Moving",
+    "Expense": "travel",
+    "Allotted": "150",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Moving",
+    "Expense": "deposits",
+    "Allotted": "4600",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Moving",
+    "Expense": "move",
+    "Allotted": "1200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Transportation",
+    "Expense": "laisure",
+    "Allotted": "300",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Food",
+    "Expense": "groceries",
+    "Allotted": "1000",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Food",
+    "Expense": "eating out",
+    "Allotted": "500",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Food",
+    "Expense": "vitamins",
+    "Allotted": "100",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "misc",
+    "Allotted": "200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "clothing",
+    "Allotted": "0",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "beauty",
+    "Allotted": "200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "misc",
+    "Allotted": "300",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
+  },
+  {
+    "Category": "Legal",
+    "Expense": "citizenship",
+    "Allotted": "630",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "June"
   }
 ]
