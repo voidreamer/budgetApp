@@ -539,7 +539,7 @@
     "Category": "Housing",
     "Expense": "Rent",
     "Allotted": "2360",
-    "Spending": "0",
+    "Spending": "2359.0",
     "Comment": "0",
     "Month": "June"
   },
@@ -547,7 +547,7 @@
     "Category": "Housing",
     "Expense": "Internet",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "120.9",
     "Comment": "0",
     "Month": "June"
   },
@@ -555,7 +555,7 @@
     "Category": "Housing",
     "Expense": "Phone",
     "Allotted": "120",
-    "Spending": "0",
+    "Spending": "110.29",
     "Comment": "0",
     "Month": "June"
   },
@@ -563,7 +563,7 @@
     "Category": "Housing",
     "Expense": "Utilities",
     "Allotted": "110",
-    "Spending": "0",
+    "Spending": "110.63000000000001",
     "Comment": "0",
     "Month": "June"
   },
@@ -571,7 +571,7 @@
     "Category": "Housing",
     "Expense": "Insurance",
     "Allotted": "30",
-    "Spending": "0",
+    "Spending": "27.46",
     "Comment": "0",
     "Month": "June"
   },
@@ -587,7 +587,7 @@
     "Category": "Moving",
     "Expense": "deposits",
     "Allotted": "4600",
-    "Spending": "0",
+    "Spending": "4600",
     "Comment": "0",
     "Month": "June"
   },
@@ -603,7 +603,7 @@
     "Category": "Transportation",
     "Expense": "laisure",
     "Allotted": "300",
-    "Spending": "0",
+    "Spending": "179.13",
     "Comment": "0",
     "Month": "June"
   },
@@ -611,7 +611,7 @@
     "Category": "Food",
     "Expense": "groceries",
     "Allotted": "1000",
-    "Spending": "0",
+    "Spending": "860.0400000000001",
     "Comment": "0",
     "Month": "June"
   },
@@ -619,7 +619,7 @@
     "Category": "Food",
     "Expense": "eating out",
     "Allotted": "500",
-    "Spending": "0",
+    "Spending": "569.49",
     "Comment": "0",
     "Month": "June"
   },
@@ -627,7 +627,7 @@
     "Category": "Food",
     "Expense": "vitamins",
     "Allotted": "100",
-    "Spending": "0",
+    "Spending": "63.97",
     "Comment": "0",
     "Month": "June"
   },
@@ -635,7 +635,7 @@
     "Category": "Entertainment",
     "Expense": "misc",
     "Allotted": "200",
-    "Spending": "0",
+    "Spending": "327.70000000000005",
     "Comment": "0",
     "Month": "June"
   },
@@ -643,7 +643,7 @@
     "Category": "Misc",
     "Expense": "clothing",
     "Allotted": "0",
-    "Spending": "0",
+    "Spending": "401.03999999999996",
     "Comment": "0",
     "Month": "June"
   },
@@ -651,7 +651,7 @@
     "Category": "Misc",
     "Expense": "beauty",
     "Allotted": "200",
-    "Spending": "0",
+    "Spending": "184.56",
     "Comment": "0",
     "Month": "June"
   },
@@ -659,7 +659,7 @@
     "Category": "Misc",
     "Expense": "misc",
     "Allotted": "300",
-    "Spending": "0",
+    "Spending": "245.86",
     "Comment": "0",
     "Month": "June"
   },
@@ -667,7 +667,7 @@
     "Category": "Legal",
     "Expense": "citizenship",
     "Allotted": "630",
-    "Spending": "0",
+    "Spending": "630.0",
     "Comment": "0",
     "Month": "June"
   }
