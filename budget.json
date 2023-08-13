@@ -670,5 +670,213 @@
     "Spending": "630.0",
     "Comment": "0",
     "Month": "June"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2360",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Internet",
+    "Allotted": "120",
+    "Spending": "120.9",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "120",
+    "Spending": "113.16",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "110",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Insurance",
+    "Allotted": "30",
+    "Spending": "27.46",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Transportation",
+    "Expense": "City",
+    "Allotted": "50",
+    "Spending": "154.88",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Moving",
+    "Expense": "travel",
+    "Allotted": "150",
+    "Spending": "201.1",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Food",
+    "Expense": "groceries",
+    "Allotted": "1000",
+    "Spending": "968.4700000000001",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Food",
+    "Expense": "eating out",
+    "Allotted": "500",
+    "Spending": "691.4999999999999",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Food",
+    "Expense": "vitamins",
+    "Allotted": "100",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "misc",
+    "Allotted": "200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "clothing",
+    "Allotted": "0",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "beauty",
+    "Allotted": "50",
+    "Spending": "83.96",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "misc",
+    "Allotted": "300",
+    "Spending": "71.23",
+    "Comment": "0",
+    "Month": "July"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Rent",
+    "Allotted": "2780",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Internet",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Phone",
+    "Allotted": "120",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Utilities",
+    "Allotted": "110",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Housing",
+    "Expense": "Insurance",
+    "Allotted": "30",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Transportation",
+    "Expense": "City",
+    "Allotted": "50",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Moving",
+    "Expense": "Niagara Falls",
+    "Allotted": "1200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Food",
+    "Expense": "groceries",
+    "Allotted": "1000",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Food",
+    "Expense": "eating out",
+    "Allotted": "500",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Food",
+    "Expense": "vitamins",
+    "Allotted": "100",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Entertainment",
+    "Expense": "misc",
+    "Allotted": "200",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
+  },
+  {
+    "Category": "Misc",
+    "Expense": "misc",
+    "Allotted": "300",
+    "Spending": "0",
+    "Comment": "0",
+    "Month": "August"
   }
 ]
