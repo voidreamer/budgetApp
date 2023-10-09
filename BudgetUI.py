@@ -4,6 +4,9 @@ import tkinter
 from functools import partial
 from tkinter import filedialog
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from PySide2 import QtWidgets, QtGui, QtCore
 from matplotlib import pyplot
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
@@ -44,8 +47,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
     def __init__(self, data_path):
         super().__init__()
+        settings = QtCore.QSettings("EP", "BudgetApp")
+        self.restoreGeometry(settings.value("windowGeometry"))
+        self.restoreState(settings.value("windowState"))
+
         self._data_path = data_path
-        # QtWidgets.QInputDialog.getItem(QtWidgets.QWidget(), "Edit budget", "Enter the updated budget item details as a dict:", ["Item1", "Item2", "Item3"])
         self._data = set_json_data(data_path)
         self.init_UI()
         self.setStyleSheet("""
@@ -76,9 +82,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
     def init_UI(self):
         self.setMinimumSize(1280, 720)
         # Create a calendar widget
-        self.calendar = QtWidgets.QCalendarWidget()
-        self.calendar.setGridVisible(True)
-        self.calendar.selectionChanged.connect(self.on_calendar_selection_changed)
+        self.dateEdit = QtWidgets.QDateEdit(self)
+        self.dateEdit.setDisplayFormat('MMMM yyyy')
+        self.dateEdit.setDate(QtCore.QDate.currentDate())
+        self.dateEdit.setCalendarPopup(True)
+        self.dateEdit.calendarWidget().selectionChanged.connect(self.on_calendar_selection_changed)
 
         # Create a QTreeWidget
         self.tree = BudgetTree(self)
@@ -89,7 +97,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             ['Category', 'Expense', 'Allotted', 'Spending', 'Comment', 'Btn'])
 
         # Connect the itemChanged signal to a slot
-        self.tree.itemChanged.connect(self.set_cell_style)
+        # self.tree.itemChanged.connect(self.set_cell_style)
         self.figure, self.axes = pyplot.subplots()
 
         # Create a FigureCanvasQTAgg object to display the figure
@@ -107,17 +115,14 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.add_transaction_button = QtWidgets.QPushButton('Add transaction')
         self.add_transaction_button.clicked.connect(self.show_add_transaction_popup)
 
-        self.calendar.setMinimumSize(450, 200)
-        self.calendar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.category_btn = QtWidgets.QPushButton('Add category')
 
         mainLayout = QtWidgets.QHBoxLayout()
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.calendar)
+        layout.addWidget(self.dateEdit)
         layout.addWidget(self.tree)
-        # layout.addWidget(self.category_btn)
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
@@ -243,6 +248,12 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         # popup_instance.accept()
 
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        settings = QtCore.QSettings("EP", "BudgetApp")
+        settings.setValue("windowGeometry", self.saveGeometry())
+        settings.setValue("windowState", self.saveState())
+        super().closeEvent(event)
+
     def _clear_table_data(self):
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
@@ -317,17 +328,9 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
     def on_calendar_selection_changed(self):
         # Update the table data when the calendar selection changes
-        print(f'month : {self.calendar.selectedDate().toString("MMMM")}')
-        self.get_data_for_month(self.calendar.selectedDate().toString("MMMM"))
-        self.set_table_data()
-
-    '''
-    def get_data_for_month(self, month):
-        # Return the data for the specified month from the JSON file
-        with open(self._data_path, 'r') as jsonfile:
-            data = json.load(jsonfile)
-        return [row for row in data if row['Month'] == month]
-    '''
+        print(f'month : {self.dateEdit.calendarWidget().selectedDate().toString("MMMM")}')
+        self.get_data_for_month(self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
+        # self.set_table_data()
 
     def save_table_data(self):
         # Read the JSON file and store the data in a list
@@ -335,7 +338,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             data = json.load(jsonfile)
 
         # Get the selected month from the calendar widget
-        selected_month = self.calendar.selectedDate().toString("MMMM")
+        selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
 
         # Remove the existing data for the selected month from the data list
         data = [row for row in data if row['Month'] != selected_month]
@@ -359,6 +362,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         with open(self._data_path, 'w') as jsonfile:
             json.dump(data, jsonfile, indent=2)
 
+    '''
     def set_cell_style(self, item):
         # Set the cell style based on the values in the "Spending" and "Allotted" columns
         if item.column() == 3:  # Check if the changed item is in the "Spending" column
@@ -375,12 +379,12 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             else:
                 item.setForeground(QtGui.QColor('black'))
                 item.setBackground(QtGui.QColor('white'))
-
+    
     def set_table_data(self):
         # elf.delete_add_row_btn()
 
         # Get the selected month from the calendar widget
-        selected_month = self.calendar.selectedDate().toString('MMMM')
+        selected_month = self.dateEdit.calendarWidget().selectedDate().toString('MMMM')
 
         # Filter the data to only include the selected month
         data = [row for row in self._data if row['Month'] == selected_month]
@@ -403,19 +407,26 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         row_btn = self.add_row_button()
         self.table.setCellWidget(self.table.rowCount() - 1, 0, row_btn)
         row_btn.clicked.connect(self.add_row_button_clicked)
+    '''
 
     def show_add_transaction_popup(self):
+        def populateSubcategories(categoryIndex: int):
+            subcategories = monthData[combo_category.currentText()]
+            combo_subcategory.clear()
+            combo_subcategory.addItems(subcategories)
+
         popup = QtWidgets.QDialog(self)
         popup.setWindowTitle("Add transaction")
         popup.setMinimumWidth(1000)
 
         combo_category = QtWidgets.QComboBox(popup)
-        combo_category.addItems(set([self.table.item(row, 0).text() for row in range(self.table.rowCount()) if self.table.item(row, 0) is not None]))
+        combo_category.currentIndexChanged.connect(populateSubcategories)
+        monthData = self._data.get(self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
+        if monthData is None:
+            return
+        combo_category.addItems(monthData)
         combo_subcategory = QtWidgets.QComboBox(popup)
-        combo_subcategory.addItems(set(
-            [self.table.item(row, 1).text() for row in range(self.table.rowCount())
-             if self.table.item(row, 1) is not None and self.table.item(row, 0) == combo_category.currentText()
-             ]))
+        combo_subcategory.addItems(monthData[combo_category.currentText()])
 
         input_text = QtWidgets.QLineEdit(popup)
         input_text.setPlaceholderText("Enter amount")
@@ -456,23 +467,31 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
     def visualize_data(self):
         # Get the selected month from the calendar widget
-        selected_month = self.calendar.selectedDate().toString('MMMM')
+        selectedMonth = self.dateEdit.calendarWidget().selectedDate().toString('MMMM')
 
         # Filter the data to only include the selected month
-        data = [row for row in self._data if row['Month'] == selected_month]
+        data = self._data.get(selectedMonth)
+        if data is None:
+            return
 
         # Extract the category, expense, and spending data from the JSON data
-        categories = [row['Category'] for row in data]
-        expenses = [row['Expense'] for row in data]
-        amounts = [float(row['Allotted']) for row in data]
-        spending = [float(row['Spending']) for row in data]
+        categories = []
+        expenses = []
+        amounts = []
+        spending = []
 
+        for category, subdict in data.items():
+            categories.append(category)
+            for subcategory, values in subdict.items():
+                expenses.append(subcategory)
+                amounts.append(float(values['Allotted']))
+                spending.append(float(values['Spending']))
         # Create a bar chart with the data
         self.axes.clear()
         self.axes.set_facecolor('#222222')
         self.axes.barh(expenses, amounts, color='#444444')
         self.axes.barh(expenses, spending, color='#FF3333', alpha=0.9)
-        self.axes.set_title(f'{selected_month} Budget')
+        self.axes.set_title(f'{selectedMonth} Budget')
         self.axes.set_xlabel('Allotted')
         self.axes.set_ylabel('Expense')
         self.axes.set_yticks(expenses)
@@ -491,17 +510,55 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         for x, y in enumerate(amounts):
             self.axes.text(y + 5, x - 0.4, str(y), color='#CCCCCC', fontweight='bold')
 
-        '''
-        # Add a label in the middle of each bar with the amount value
-        for i, bar in enumerate(self.axes.containers[0]):
-            height = bar.get_height()
-            self.axes.text(bar.get_x() + bar.get_width() / 2, height / 2, str(height), ha='center', va='bottom')
-        '''
+        plt.legend(['Allotted', 'Spending'])
+        plt.tight_layout()
 
         self.axes.legend()
 
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
+
+    def stacked_bar_chart(self, categories, subcategories, values, width=0.8):
+        # Get the number of main categories and subcategories
+        n_categories = len(categories)
+        n_subcategories = len(subcategories[0])
+
+        # Create an array of positions for the main categories
+        category_pos = np.arange(n_categories)
+
+        # Loop over the categories and plot the bars with an offset
+        for i in range(n_categories):
+            # Get the values for the current category
+            category_values = values[i]
+
+            # Calculate the offset and the bar width
+            offset = width / 2 - (i + 0.5) * width / n_categories
+            bar_width = width / n_categories
+
+            # Initialize an array of bottom positions for each segment
+            bottoms = np.zeros(n_subcategories)
+
+            # Loop over the subcategories and plot the segments with different colors
+            colors = plt.cm.tab20(np.linspace(0, 1, n_subcategories))
+            for j in range(n_subcategories):
+                # Get the value for the current segment
+                try:
+                    segment_value = category_values[j]
+                except IndexError:
+                    # Do something when the index is out of range
+                    segment_value = [0, 0]  # Use a default value
+
+                # Plot the segment with a color and a bottom position
+                plt.bar(category_pos[i] + offset, segment_value[0], bar_width / 2,
+                        align='center', color=colors[j], bottom=bottoms[j])
+                plt.bar(category_pos[i] + offset + bar_width / 2, segment_value[1], bar_width / 2,
+                        align='center', color=colors[j], bottom=bottoms[j], alpha=0.9)
+
+                # Update the bottom position for the next segment
+                bottoms[j] += segment_value[0]
+
+        # Set the xticks and labels
+        plt.xticks(category_pos + width / 4, categories)
 
 
 class BudgetItem(QtWidgets.QTreeWidgetItem):
