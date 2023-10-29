@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from functools import partial
 
 import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
+import seaborn as sns
 from PySide2 import QtWidgets, QtGui, QtCore
 from matplotlib import pyplot
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
@@ -20,7 +21,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
     budget_added = QtCore.Signal(dict)
     budget_removed = QtCore.Signal(dict)
     budget_updated = QtCore.Signal(dict)
-    add_new_transaction_signal = QtCore.Signal()
+    add_new_transaction_signal = QtCore.Signal(str, str, str, str)
+    del_transaction_signal = QtCore.Signal(dict)
 
     def __init__(self, budget):
         super().__init__()
@@ -31,6 +33,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.restoreState(settings.value("windowState"))
 
         # Initialize UI.
+        self.setWindowTitle('No Bullshit Budget')
         self.setMinimumSize(1280, 720)
         # Create a calendar widget
         self.dateEdit = QtWidgets.QDateEdit(self)
@@ -42,11 +45,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Create a QTreeWidget
         self.tree = BudgetTreeWidget(self)
         self.tree.setItemDelegate(BudgetItemDelegate(self.tree))
-        self.tree.setColumnCount(6)
+        self.tree.setColumnCount(5)
         self.tree.header().setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
         self.tree.header().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
         self.tree.setHeaderLabels(
-            ['Category', 'Expense', 'Allotted', 'Spending', 'Comment', 'Btn'])
+            ['Category', 'Expense', 'Allotted', 'Spending', 'Comment'])
 
         # Connect the itemChanged signal to a slot
         # self.tree.itemChanged.connect(self.set_cell_style)
@@ -54,7 +57,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         # Create a FigureCanvasQTAgg object to display the figure
         self.figure_canvas = FigureCanvasQTAgg(self.figure)
-        self.figure.set_facecolor("#222222")
+        self.figure.set_facecolor("#AAAAAA")
 
         # Create a button to save the table data to the loaded json file.
         self.save_button = QtWidgets.QPushButton('Save')
@@ -121,34 +124,6 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.budget_removed.connect(self.budget.remove_budget)
         self.budget_updated.connect(self.budget.update_budget)
         '''
-
-    def add_transaction(self, transaction_value: str, transaction_comment: str) -> None:
-        category = self.combo_category.currentText()
-        subcategory = self.combo_subcategory.currentText()
-
-        # Look up category and subcategory in self.tree
-        for i in range(self.tree.topLevelItemCount()):
-            category_item = self.tree.topLevelItem(i)
-
-            if category_item.text(0) != category:
-                continue
-            for j in range(category_item.childCount()):
-                subcategory_item = category_item.child(j)
-                if subcategory_item.text(1) != subcategory:
-                    continue
-                budget_data = subcategory_item.data(0, QtCore.Qt.UserRole)
-
-                new_value = budget_data.spending + float(transaction_value)
-                subcategory_item.spending = new_value
-                break
-            break
-
-        self.table.item(selected_row, 3).setText(str(new_value))
-
-        categoryData[category].append(expense)
-        # self.budget.add_new_transaction(categoryData, float(transaction_value), allotted, transaction_comment)
-
-        # popup_instance.accept()
 
     def get_data_for_month(self, input_month: str) -> None:
         ''' Populates the tree widget with data from the json file.
@@ -369,62 +344,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         '''
 
     def show_add_transaction_popup(self):
-        def populateSubcategories():
-            subcategories = monthData[self.combo_category.currentText()]
-            if self.combo_subcategory is not None:
-                self.combo_subcategory.clear()
-                self.combo_subcategory.addItems(subcategories)
-
-        popup = QtWidgets.QDialog(self)
-        popup.setWindowTitle("Add transaction")
-        popup.setMinimumWidth(1000)
-
-        self.combo_category = QtWidgets.QComboBox(popup)
-        self.combo_category.currentIndexChanged.connect(populateSubcategories)
-        monthData = self.budget.data.get(self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
-        if monthData is None:
-            return
-        self.combo_category.addItems(monthData)
-        self.combo_subcategory = QtWidgets.QComboBox(popup)
-        self.combo_subcategory.addItems(monthData[self.combo_category.currentText()])
-
-        input_text = QtWidgets.QLineEdit(popup)
-        input_text.setPlaceholderText("Enter amount")
-
-        transaction_comment = QtWidgets.QLineEdit(popup)
-        transaction_comment.setPlaceholderText("Description...")
-
-        tableLayout = QtWidgets.QVBoxLayout()
-        historyTable = QtWidgets.QTableWidget()
-        historyTable.setColumnCount(5)
-        historyTable.setRowCount(len(self.budget.transactions))
-        historyTable.setHorizontalHeaderLabels(["category", "Expense", "Spending", "Alloted", "Comment"])
-        tableLayout.addWidget(historyTable)
-
-        add_button = QtWidgets.QPushButton("Add transaction", popup)
-        # add_button.clicked.connect(lambda: self.add_transaction(input_text.text(), transaction_comment.text(), popup))
-        add_button.clicked.connect(lambda: self.add_new_transaction_signal.emit())
-
-        # Add data to the table .
-        for row, transaction in enumerate(self.budget.transactions):
-            historyTable.setItem(row, 0, QtWidgets.QTableWidgetItem(transaction.category))
-            historyTable.setItem(row, 1, QtWidgets.QTableWidgetItem(transaction.expense))
-            historyTable.setItem(row, 2, QtWidgets.QTableWidgetItem(str(transaction.amount)))
-            historyTable.setItem(row, 3, QtWidgets.QTableWidgetItem(str(transaction.allotted)))
-            historyTable.setItem(row, 4, QtWidgets.QTableWidgetItem(transaction.comment))
-
-        main_layout = QtWidgets.QVBoxLayout()
-        input_layout = QtWidgets.QHBoxLayout()
-        input_layout.addWidget(self.combo_category)
-        input_layout.addWidget(self.combo_subcategory)
-        input_layout.addWidget(input_text)
-        input_layout.addWidget(transaction_comment)
-        input_layout.addWidget(add_button)
-        main_layout.addLayout(input_layout)
-        main_layout.addLayout(tableLayout)
-
-        popup.setLayout(main_layout)
-        popup.exec_()
+        popup = AddTransactionPopup(self, self.budget, self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
 
     def visualize_data(self):
         # Get the selected month from the calendar widget
@@ -438,53 +358,157 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Extract the category, expense, and spending data from the JSON data
         expenses = []
         amounts = []
-        spending = []
+        types = []
 
         for category, subdict in data.items():
             for subcategory, values in subdict.items():
                 expenses.append(subcategory)
                 amounts.append(float(values['Allotted']))
-                spending.append(float(values['Spending']))
+                types.append('Allotted')
+                expenses.append(subcategory)
+                amounts.append(float(values['Spending']))
+                types.append('Spending')
 
-        # Get the indices that would sort the spending list
-        spending = np.array(spending)
-        idx = spending.argsort()
+        # Create a dataframe with the data
+        data = pd.DataFrame({'expenses': expenses, 'amounts': amounts, 'types': types})
 
-        # Reorder the lists using the indices
-        expenses = [expenses[i] for i in idx]
-        amounts = [amounts[i] for i in idx]
-        spending = [spending[i] for i in idx]
+        # Set the theme of the plot
+        sns.set_theme(style="whitegrid", palette="pastel", font_scale=1.2, color_codes=True)
 
-        # Create a bar chart with the data
+        # Create a bar chart with seaborn
         self.axes.clear()
-        self.axes.set_facecolor('#222222')
-        self.axes.barh(expenses, amounts, color='#444444')
-        self.axes.barh(expenses, spending, color='#FF3333', alpha=0.9)
+        ax = sns.barplot(x="amounts", y="expenses", hue="types", data=data, ax=self.axes)
         self.axes.set_title(f'{selectedMonth} Budget')
-        self.axes.set_xlabel('Allotted')
+        self.axes.set_xlabel('Amount')
         self.axes.set_ylabel('Expense')
-        self.axes.set_yticks(expenses)
-        self.axes.set_yticklabels(expenses)
-        self.axes.xaxis.label.set_color('white')
-        self.axes.yaxis.label.set_color('white')
-        self.axes.title.set_color('white')
-        self.axes.tick_params(axis='x', colors='white')
-        self.axes.tick_params(axis='y', colors='white')
-        self.axes.spines['top'].set_color('white')
-        self.axes.spines['bottom'].set_color('white')
-        self.axes.spines['left'].set_color('white')
-        self.axes.spines['right'].set_color('white')
 
-        # Add labels with the amount value to the middle of each bar
-        for x, y in enumerate(amounts):
-            self.axes.text(y + 5, x - 0.4, str(y), color='#CCCCCC', fontweight='bold')
+        # Remove the top and right spines
+        sns.despine(offset=10)
 
-        plt.legend(['Allotted', 'Spending'])
+        # Adjust the spacing and padding
+        plt.tight_layout(pad=1)
 
-        self.axes.legend()
+        # Add labels and numbers to the barplot
+        for container in ax.containers:
+            ax.bar_label(container, fmt='%.2f')
 
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
+
+
+class AddTransactionPopup(QtWidgets.QDialog):
+    def __init__(self, parent, budget, month):
+        super().__init__(parent)
+        self.budget = budget
+        self.setWindowTitle("Add transaction")
+        self.setMinimumWidth(1000)
+
+        self.month_data = self.budget.data.get(month)
+        if self.month_data is None:
+            return
+
+        self.combo_category = QtWidgets.QComboBox(self)
+        self.combo_category.addItems(self.month_data)
+        self.combo_category.addItem("Add new...")
+        self.combo_subcategory = QtWidgets.QComboBox(self)
+
+        self.combo_category.currentIndexChanged.connect(self.populate_subcategories)
+        self.combo_subcategory.currentIndexChanged.connect(self.add_new_category)
+        self.combo_category.setCurrentIndex(1)
+
+        transaction_amount = QtWidgets.QLineEdit(self)
+        transaction_amount.setPlaceholderText("Enter amount")
+
+        transaction_comment = QtWidgets.QLineEdit(self)
+        transaction_comment.setPlaceholderText("Description...")
+
+        tree_layout = QtWidgets.QVBoxLayout()
+        self.transactions_tree = QtWidgets.QTreeWidget()
+        self.transactions_tree.setColumnCount(4)
+        self.transactions_tree.setHeaderLabels(["category", "Expense", "Spending", "Comment"])
+        tree_layout.addWidget(self.transactions_tree)
+
+        add_button = QtWidgets.QPushButton("Add", self)
+        add_button.clicked.connect(lambda: self.add_transaction(self.combo_category.currentText(),
+                                                                self.combo_subcategory.currentText(),
+                                                                transaction_amount.text(),
+                                                                transaction_comment.text()))
+
+        delete_button = QtWidgets.QPushButton("Delete selected", self)
+        delete_button.clicked.connect(self.delete_transaction)
+
+        main_layout = QtWidgets.QVBoxLayout()
+        input_layout = QtWidgets.QHBoxLayout()
+        input_layout.addWidget(self.combo_category)
+        input_layout.addWidget(self.combo_subcategory)
+        input_layout.addWidget(transaction_amount)
+        input_layout.addWidget(transaction_comment)
+        input_layout.addWidget(add_button)
+        input_layout.addWidget(delete_button)
+        main_layout.addLayout(input_layout)
+        main_layout.addLayout(tree_layout)
+
+        self.setLayout(main_layout)
+        self.populate_rows()
+        self.exec_()
+
+    def add_new_category(self, sender=None):
+        sender = self.sender() or sender
+        text = sender.currentText()
+        if text == "Add new...":
+            print(f'add new for {sender}')
+
+    def add_transaction(self, category, expense, amount, comment):
+        # Create a new QTreeWidgetItem with the data values
+        item = QtWidgets.QTreeWidgetItem([category, expense, str(amount), comment])
+        # Add the item to the tree widget
+        self.transactions_tree.addTopLevelItem(item)
+
+    def delete_transaction(self):
+        transaction_item = self.transactions_tree.currentItem()
+        transaction_index = self.transactions_tree.indexOfTopLevelItem(transaction_item)
+        data = transaction_item.data(0, QtCore.Qt.UserRole)
+        self.transactions_tree.takeTopLevelItem(transaction_index)
+        self.parent().del_transaction_signal.emit(data)
+
+    def populate_subcategories(self):
+        if self.sender().currentText() == "Add new...":
+            self.add_new_category(self.sender())
+            return
+        subcategories = self.month_data[self.combo_category.currentText()]
+        if self.combo_subcategory is not None:
+            self.combo_subcategory.clear()
+            self.combo_subcategory.addItems(subcategories)
+            self.combo_subcategory.addItem("Add new...")
+
+    def populate_rows(self):
+        for row, transaction in enumerate(self.budget.transactions):
+            item = QtWidgets.QTreeWidgetItem(
+                [transaction.category, transaction.expense, str(transaction.amount), transaction.comment])
+            data = {"id": transaction.id,
+                    "category": transaction.category,
+                    "expense": transaction.expense,
+                    "amount": transaction.amount,
+                    "comment": transaction.comment}
+            self.transactions_tree.addTopLevelItem(item)
+
+            item.setData(0, QtCore.Qt.UserRole, data)
+            item.setText(0, item.text(0))
+            item.setText(1, item.text(1))
+            item.setText(2, item.text(2))
+            item.setText(3, item.text(3))
+            item.setText(3, item.text(4))
+
+    def closeEvent(self, arg__1: QtGui.QCloseEvent) -> None:
+        for row in range(self.transactions_tree.topLevelItemCount()):
+            category = self.transactions_tree.topLevelItem(row).text(0)
+            expense = self.transactions_tree.topLevelItem(row).text(1)
+            amount = self.transactions_tree.topLevelItem(row).text(2)
+            comment = self.transactions_tree.topLevelItem(row).text(3)
+            row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
+            print(f'rowdata {row_data} - {category} - {expense} - {amount} - {comment}')
+            if row_data is None:
+                self.parent().add_new_transaction_signal.emit(category, expense, amount, comment)
 
 
 class BudgetCategoryItem(QtWidgets.QTreeWidgetItem):
