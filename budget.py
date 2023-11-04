@@ -1,8 +1,10 @@
+import configparser
 import json
 import sys
 import tkinter
 import uuid
 from dataclasses import dataclass, field
+from pathlib import Path
 from tkinter import filedialog
 from typing import Dict, List, Set
 
@@ -81,8 +83,28 @@ def set_json_data(data_path):
 
 
 if __name__ == '__main__':
+    config_file = Path(__file__).parent / r"config.ini"
+    config = configparser.ConfigParser()
+    if not config_file.exists():
+        config.add_section('settings')
+
+        config.set('settings', 'last_file', '.')
+        with open(config_file, 'w') as configfile:
+            config.write(configfile)
+
+    config.read(config_file)
+    last_file = Path(config['settings']['last_file'])
+
     root = tkinter.Tk()
     root.withdraw()
     app = QtWidgets.QApplication(sys.argv)
-    bud = Budget(filedialog.askopenfilename(parent=root, title='Select data JSON file', filetypes=[('JSON', '*.json')]))
+    file_path = filedialog.askopenfilename(
+        parent=root, title='Select data JSON file', initialfile=last_file,
+        initialdir=last_file.parent, filetypes=[('JSON', '*.json')])
+    last_file = Path(file_path)
+    config.set('settings', 'last_file', last_file.as_posix())
+    with open(config_file, 'w') as configfile:
+        config.write(configfile)
+
+    bud = Budget(file_path)
     sys.exit(app.exec_())
