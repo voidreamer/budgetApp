@@ -34,9 +34,24 @@ class Budget:
     def data(self):
         return self._data
 
+    @data.setter
+    def data(self, value):
+        self._data = value
+
     @property
     def transactions(self):
         return self.budget_transactions.transactions
+
+    def add_new_category(self, month: str, category: str, expense: str, allotted: str, comment: str) -> None:
+        month_data = self.data[month]
+        expense_data = {expense: {"Allotted": allotted,
+                                  "Spending": 0,
+                                  "Comment": comment}}
+        if category in month_data:
+            month_data[category].update(expense_data)
+        else:
+            month_data[category] = expense_data
+        self.data[month] = month_data
 
     def add_new_transaction(self, *args, **kwargs) -> None:
         self.budget_transactions.add_new_transaction(*args)

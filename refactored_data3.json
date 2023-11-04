@@ -1,0 +1,676 @@
+{
+    "January": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2350",
+                "Spending": "0 ",
+                "Comment": ""
+            },
+            "Utilities": {
+                "Allotted": "120",
+                "Spending": "0",
+                "Comment": ""
+            },
+            "Phone": {
+                "Allotted": "150",
+                "Spending": "0",
+                "Comment": ""
+            }
+        },
+        "Food": {
+            "Eating out": {
+                "Allotted": "500",
+                "Spending": "0",
+                "Comment": ""
+            }
+        },
+        "Miscellaneous": {
+            "Misc": {
+                "Allotted": "100",
+                "Spending": "0",
+                "Comment": ""
+            }
+        },
+        "Entertainment": {
+            "Entertainment": {
+                "Allotted": "200",
+                "Spending": "0",
+                "Comment": ""
+            }
+        },
+        "Savings": {
+            "Savings": {
+                "Allotted": "1800",
+                "Spending": "0",
+                "Comment": ""
+            }
+        }
+    },
+    "December": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2350",
+                "Spending": "0",
+                "Comment": ""
+            },
+            "Utilities": {
+                "Allotted": "120",
+                "Spending": "102",
+                "Comment": ""
+            },
+            "Phone": {
+                "Allotted": "150",
+                "Spending": "128",
+                "Comment": ""
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "118",
+                "Comment": ""
+            },
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "28",
+                "Comment": ""
+            }
+        },
+        "Food": {
+            "Groceries": {
+                "Allotted": "1000",
+                "Spending": "726",
+                "Comment": ""
+            },
+            "Eating out": {
+                "Allotted": "500",
+                "Spending": "500",
+                "Comment": ""
+            }
+        },
+        "Miscellaneous": {
+            "Misc": {
+                "Allotted": "400",
+                "Spending": "2353",
+                "Comment": ""
+            }
+        },
+        "Entertainment": {
+            "Entertainment": {
+                "Allotted": "200",
+                "Spending": "156",
+                "Comment": ""
+            }
+        },
+        "Savings": {
+            "Savings": {
+                "Allotted": "1800",
+                "Spending": "0",
+                "Comment": ""
+            }
+        }
+    },
+    "February": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2350",
+                "Spending": "2359",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "120",
+                "Spending": "106",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "150",
+                "Spending": "110.29",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "118",
+                "Comment": "0"
+            }
+        },
+        "Housing ": {
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "28",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "Groceries": {
+                "Allotted": "1000",
+                "Spending": "494",
+                "Comment": "0"
+            },
+            "Eating Out": {
+                "Allotted": "500",
+                "Spending": "393.0",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "Misc Needs": {
+                "Allotted": "400",
+                "Spending": "618.0",
+                "Comment": "Nike, Sephora, Amazon, Needs a Special Categories too"
+            }
+        },
+        "Entertainment": {
+            "Misc": {
+                "Allotted": "200",
+                "Spending": "67.73",
+                "Comment": "0"
+            }
+        },
+        "Legal": {
+            "Driving": {
+                "Allotted": "700",
+                "Spending": "494.45",
+                "Comment": "0"
+            }
+        }
+    },
+    "March": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2360",
+                "Spending": "2359",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "120",
+                "Spending": "94.61999999999999",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "120",
+                "Spending": "110.29",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "120.9",
+                "Comment": "0"
+            }
+        },
+        "Housing ": {
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "27.46",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "Groceries": {
+                "Allotted": "1000",
+                "Spending": "982.6899999999998",
+                "Comment": "0"
+            },
+            "Eating Out": {
+                "Allotted": "500",
+                "Spending": "404.59",
+                "Comment": "0"
+            }
+        },
+        "Legal": {
+            "Driving": {
+                "Allotted": "220",
+                "Spending": "220",
+                "Comment": "0"
+            }
+        },
+        "Entertainment": {
+            "Entertainment": {
+                "Allotted": "200",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "Misc": {
+                "Allotted": "200",
+                "Spending": "122.6",
+                "Comment": "0"
+            },
+            "Clothing": {
+                "Allotted": "200",
+                "Spending": "300.198",
+                "Comment": "0"
+            },
+            "Vitamins": {
+                "Allotted": "120",
+                "Spending": "29.979999999999997",
+                "Comment": "0"
+            }
+        },
+        "Misc ": {
+            "Beauty": {
+                "Allotted": "100",
+                "Spending": "123.64",
+                "Comment": "0"
+            }
+        }
+    },
+    "April": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2360",
+                "Spending": "2359.0",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "120",
+                "Spending": "106.99000000000001",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "120",
+                "Spending": "114.18",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "120.90",
+                "Comment": "0"
+            },
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "27.46",
+                "Comment": "0"
+            }
+        },
+        "Car": {
+            "Rent": {
+                "Allotted": "220",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "Groceries": {
+                "Allotted": "1000",
+                "Spending": "965.37",
+                "Comment": "0"
+            },
+            "Eating Out": {
+                "Allotted": "500",
+                "Spending": "627.61",
+                "Comment": "0"
+            }
+        },
+        "Entertainment": {
+            "Entertainment": {
+                "Allotted": "200",
+                "Spending": "187.91",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "Clothing": {
+                "Allotted": "0",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Misc": {
+                "Allotted": "200",
+                "Spending": "454.55",
+                "Comment": "0"
+            },
+            "Beauty": {
+                "Allotted": "100",
+                "Spending": "230.89000000000001",
+                "Comment": "0"
+            },
+            "Vitamins": {
+                "Allotted": "120",
+                "Spending": "93.77",
+                "Comment": "0"
+            }
+        }
+    },
+    "May": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2360",
+                "Spending": "2359.0",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "120",
+                "Spending": "100.86",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "120",
+                "Spending": "110.29",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "120.9",
+                "Comment": "0"
+            },
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "27.46",
+                "Comment": "0"
+            }
+        },
+        "Transportation": {
+            "TTC": {
+                "Allotted": "80",
+                "Spending": "117.27",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "Groceries": {
+                "Allotted": "1000",
+                "Spending": "1102.3300000000002",
+                "Comment": "0"
+            },
+            "Eating out": {
+                "Allotted": "500",
+                "Spending": "725.13",
+                "Comment": "0"
+            },
+            "Vitamins": {
+                "Allotted": "100",
+                "Spending": "190.56",
+                "Comment": "0"
+            }
+        },
+        "Entertainment": {
+            "Misc": {
+                "Allotted": "200",
+                "Spending": "152.16",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "Clothing": {
+                "Allotted": "300",
+                "Spending": "446.84",
+                "Comment": "0"
+            },
+            "Misc": {
+                "Allotted": "300",
+                "Spending": "410.92",
+                "Comment": "0"
+            },
+            "Beauty": {
+                "Allotted": "50",
+                "Spending": "40.0",
+                "Comment": "0"
+            }
+        },
+        "Health": {
+            "Doctors": {
+                "Allotted": "100",
+                "Spending": "64.4",
+                "Comment": "0"
+            }
+        }
+    },
+    "June": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2360",
+                "Spending": "2359.0",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "120.9",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "120",
+                "Spending": "110.29",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "110",
+                "Spending": "110.63000000000001",
+                "Comment": "0"
+            },
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "27.46",
+                "Comment": "0"
+            }
+        },
+        "Moving": {
+            "travel": {
+                "Allotted": "150",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "deposits": {
+                "Allotted": "4600",
+                "Spending": "4600",
+                "Comment": "0"
+            },
+            "move": {
+                "Allotted": "1200",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Transportation": {
+            "laisure": {
+                "Allotted": "300",
+                "Spending": "179.13",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "groceries": {
+                "Allotted": "1000",
+                "Spending": "860.0400000000001",
+                "Comment": "0"
+            },
+            "eating out": {
+                "Allotted": "500",
+                "Spending": "569.49",
+                "Comment": "0"
+            },
+            "vitamins": {
+                "Allotted": "100",
+                "Spending": "63.97",
+                "Comment": "0"
+            }
+        },
+        "Entertainment": {
+            "misc": {
+                "Allotted": "200",
+                "Spending": "327.70000000000005",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "clothing": {
+                "Allotted": "0",
+                "Spending": "401.03999999999996",
+                "Comment": "0"
+            },
+            "beauty": {
+                "Allotted": "200",
+                "Spending": "184.56",
+                "Comment": "0"
+            },
+            "misc": {
+                "Allotted": "300",
+                "Spending": "245.86",
+                "Comment": "0"
+            }
+        },
+        "Legal": {
+            "citizenship": {
+                "Allotted": "630",
+                "Spending": "630.0",
+                "Comment": "0"
+            }
+        }
+    },
+    "July": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2360",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "120.9",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "120",
+                "Spending": "113.16",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "110",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "27.46",
+                "Comment": "0"
+            }
+        },
+        "Transportation": {
+            "City": {
+                "Allotted": "50",
+                "Spending": "154.88",
+                "Comment": "0"
+            }
+        },
+        "Moving": {
+            "travel": {
+                "Allotted": "150",
+                "Spending": "201.1",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "groceries": {
+                "Allotted": "1000",
+                "Spending": "968.4700000000001",
+                "Comment": "0"
+            },
+            "eating out": {
+                "Allotted": "500",
+                "Spending": "691.4999999999999",
+                "Comment": "0"
+            },
+            "vitamins": {
+                "Allotted": "100",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Entertainment": {
+            "misc": {
+                "Allotted": "200",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "clothing": {
+                "Allotted": "0",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "beauty": {
+                "Allotted": "50",
+                "Spending": "83.96",
+                "Comment": "0"
+            },
+            "misc": {
+                "Allotted": "300",
+                "Spending": "71.23",
+                "Comment": "0"
+            }
+        }
+    },
+    "August": {
+        "Housing": {
+            "Rent": {
+                "Allotted": "2780",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Internet": {
+                "Allotted": "120",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Phone": {
+                "Allotted": "120",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Utilities": {
+                "Allotted": "110",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "Insurance": {
+                "Allotted": "30",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Transportation": {
+            "City": {
+                "Allotted": "50",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Moving": {
+            "Niagara Falls": {
+                "Allotted": "1200",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Food": {
+            "groceries": {
+                "Allotted": "1000",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "eating out": {
+                "Allotted": "500",
+                "Spending": "0",
+                "Comment": "0"
+            },
+            "vitamins": {
+                "Allotted": "100",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Entertainment": {
+            "misc": {
+                "Allotted": "200",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        },
+        "Misc": {
+            "misc": {
+                "Allotted": "300",
+                "Spending": "0",
+                "Comment": "0"
+            }
+        }
+    }
+}

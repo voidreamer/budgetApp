@@ -150,9 +150,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         for category, category_data in self.budget.data[input_month].items():
             category_item = BudgetCategoryItem(self.tree)
-
             category_item.setText(0, category)
-
             for expense, expenseData in category_data.items():
                 BudgetItem(category_item,
                            expense,
@@ -400,6 +398,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
     def __init__(self, parent, budget, month):
         super().__init__(parent)
         self.budget = budget
+        self.month = month
         self.setWindowTitle("Add transaction")
         self.setMinimumWidth(1000)
 
@@ -411,6 +410,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.combo_category.addItems(self.month_data)
         self.combo_category.addItem("Add new...")
         self.combo_subcategory = QtWidgets.QComboBox(self)
+        self.combo_subcategory.setObjectName('combo_expense')
 
         self.combo_category.currentIndexChanged.connect(self.populate_subcategories)
         self.combo_subcategory.currentIndexChanged.connect(self.add_new_category)
@@ -456,7 +456,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
         sender = self.sender() or sender
         text = sender.currentText()
         if text == "Add new...":
-            print(f'add new for {sender}')
+            AddNewCategoryPopup(self, self.combo_category.currentText())
 
     def add_transaction(self, category, expense, amount, comment):
         # Create a new QTreeWidgetItem with the data values
@@ -509,6 +509,65 @@ class AddTransactionPopup(QtWidgets.QDialog):
             print(f'rowdata {row_data} - {category} - {expense} - {amount} - {comment}')
             if row_data is None:
                 self.parent().add_new_transaction_signal.emit(category, expense, amount, comment)
+
+
+class AddNewCategoryPopup(QtWidgets.QDialog):
+    def __init__(self, parent,  category: str = None):
+        super().__init__(parent)
+        self.budget = parent.budget
+        self.setWindowTitle("Add new category")
+        self.setMinimumWidth(1000)
+
+        category_name = QtWidgets.QLineEdit(self)
+        category_name.setPlaceholderText("Enter category name...")
+        category_name.setText(category if category != 'Add new...' else None)
+
+        expense_name = QtWidgets.QLineEdit(self)
+        expense_name.setPlaceholderText("Enter expense name...")
+
+        allotted_amount = QtWidgets.QLineEdit(self)
+        allotted_amount.setPlaceholderText("Enter allotted amount...")
+
+        comment = QtWidgets.QLineEdit(self)
+        comment.setPlaceholderText("Enter comment...")
+
+        add_button = QtWidgets.QPushButton("Add", self)
+        add_button.clicked.connect(
+            lambda: self.add_new_category(category_name.text(), expense_name.text(),
+                                          allotted_amount.text(), comment.text()))
+
+        main_layout = QtWidgets.QVBoxLayout()
+        input_layout = QtWidgets.QHBoxLayout()
+        input_layout.addWidget(category_name)
+        input_layout.addWidget(expense_name)
+        input_layout.addWidget(allotted_amount)
+        input_layout.addWidget(comment)
+        input_layout.addWidget(add_button)
+        main_layout.addLayout(input_layout)
+
+        self.setLayout(main_layout)
+        self.exec_()
+        self.close()
+        self.destroy()
+        self.deleteLater()
+
+    def add_new_category(self, category, expense, allotted, comment):
+        tree: QtWidgets.QTreeWidget = self.parent().parent().tree
+        # Search for category if it exists in the tree
+        category_item = None
+        for i in range(tree.topLevelItemCount()):
+            if tree.topLevelItem(i).text(0) == category:
+                category_item = tree.topLevelItem(i)
+                break
+
+        if category_item is None:
+            category_item = BudgetCategoryItem(tree)
+            category_item.setText(0, category)
+        expense_item = BudgetItem(category_item, expense, float(allotted), 0.0, comment)
+        tree.addTopLevelItem(category_item)
+        self.budget.add_new_category(self.parent().month, category, expense, float(allotted), comment)
+        tree.expandItem(category_item)
+        self.close()
 
 
 class BudgetCategoryItem(QtWidgets.QTreeWidgetItem):
