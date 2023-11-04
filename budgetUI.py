@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import partial
+from pprint import pprint
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -290,56 +291,32 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Get the selected month from the calendar widget
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
 
-        '''
-        # Iterate over self.tree and add the data to self.budget.data
-        for category, subcategories in self.tree.items():
-            self.budget.data[selected_month][category] = subcategories
-            for subcategory, expenses in subcategories.items():
-                self.budget.data[selected_month][category][subcategory] = expenses
-                for expense, amount in expenses.items():
-                    self.budget.data[selected_month][category][subcategory][expense] = amount
-                    self.budget.data[selected_month][category][subcategory][expense]["comment"] = ""
-                    self.budget.data[selected_month][category][subcategory][expense]["allotted"] = 0
-                    self.budget.data[selected_month][category][subcategory][expense]["spending"] = 0
-                    self.budget.data[selected_month][category][subcategory][expense]["expense"] = expense
-                    self.budget.data[selected_month][category][subcategory][expense]["category"] = category
-                    self.budget.data[selected_month][category][subcategory][expense]["subcategory"] = subcategory
-                    self.budget.data[selected_month][category][subcategory][expense]["amount"] = amount
-        '''
-        result = {}
+        # Iterate over the tree and save the data
+        selected_month_data = self.budget.data[selected_month]
         # items = self.tree.findItems("", QtCore.Qt.MatchContains) if parent is None else parent.takeChildren()
         for i in range(self.tree.topLevelItemCount()):
-            item = self.tree.topLevelItem(i)
-            for j in range(item.childCount()):
-                child = item.child(j)
-                for k in range(child.childCount()):
-                    grandchild = child.child(k)
-                    for l in range(grandchild.childCount()):
-                        result[grandchild.text(0)] = {
-                            "Allotted": grandchild.text(2),
-                            "Spending": grandchild.text(3),
-                            "Comment": grandchild.text(4)
-                        }
-
-        for item in result:
-            text = item.text(0)
-            if item.childCount() > 0:
-                # result[text] = self.save_tree_data(item)
-                pass
-            else:
-                result[text] = {
-                    "Allotted": item.text(2),
-                    "Spending": item.text(3),
-                    "Comment": item.text(4)
+            category_item = self.tree.topLevelItem(i)
+            for j in range(category_item.childCount()):
+                category_name = category_item.text(0)
+                expense_item = category_item.child(j)
+                expense = expense_item.text(1)
+                allotted = expense_item.text(2)
+                spending = expense_item.text(3)
+                comment = expense_item.text(4)
+                category_update = {
+                    expense: {
+                        "Allotted": allotted,
+                        "Spending": spending,
+                        "Comment": comment
+                    }
                 }
-        print(result)
-        return result
+                if category_name in selected_month_data:
+                    selected_month_data[category_name].update(category_update)
+                else:
+                    selected_month_data[category_name] = category_update
 
-        '''
-        # Write the data to the JSON file
-        with open(self._data_path, 'w') as jsonfile:
-            json.dump(result, jsonfile, indent=2)
-        '''
+        self.budget.data[selected_month] = selected_month_data
+        self.budget.save()
 
     def show_add_transaction_popup(self):
         popup = AddTransactionPopup(self, self.budget, self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
