@@ -160,126 +160,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                            expenseData["Comment"],
                            )
 
-    def add_row_button_clicked(self):
-        # column_count = self.table.columnCount()
-        row_count = self.table.rowCount()
-        self.table.insertRow(row_count - 1)
-        del_row_btn = self.create_delete_row_btn()
-        for i in range(0, 5):
-            self.table.setItem(row_count - 1, i, QtWidgets.QTableWidgetItem(str("0")))
-        self.table.setCellWidget(row_count - 1, 5, del_row_btn)
-        del_row_btn.clicked.connect(partial(self.del_row_button_clicked, del_row_btn))
-
-    def add_row_button(self):
-        pixmap = QtGui.QPixmap(32, 32)
-
-        # Fill the pixmap with a transparent color
-        pixmap.fill(QtGui.QColor(0, 0, 0, 0))
-
-        # Create a QPainter object to draw on the pixmap
-        painter = QtGui.QPainter(pixmap)
-
-        # Set the pen and brush to red
-        painter.setPen(QtGui.QPen(QtGui.QColor(0, 225, 0)))
-        painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 225, 0)))
-
-        # Draw a circle on the pixmap
-        painter.drawEllipse(4, 4, 24, 24)
-
-        painter.setPen(QtGui.QPen(QtGui.QColor(225, 225, 225)))
-        painter.drawLine(8, 16, 24, 16)
-        painter.drawLine(16, 8, 16, 24)
-        painter.end()
-
-        # Save the pixmap to an image file
-        pixmap.save("icon_green_circle.png")
-
-        row_btn = QtWidgets.QPushButton()
-
-        # Set the icon for the delete button
-        row_btn.setIcon(QtGui.QIcon(pixmap))
-        row_btn.setIconSize(pixmap.size())
-        row_btn.setFixedSize(pixmap.size())
-
-        return row_btn
-
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         settings = QtCore.QSettings("EP", "BudgetApp")
         settings.setValue("windowGeometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
         super().closeEvent(event)
-
-    def _clear_table_data(self):
-        self.table.setRowCount(0)
-        self.table.setColumnCount(0)
-
-    def create_delete_row_btn(self):
-        # Create a QPixmap with a size of 32x32 pixels
-        pixmap = QtGui.QPixmap(32, 32)
-
-        # Fill the pixmap with a transparent color
-        pixmap.fill(QtGui.QColor(0, 0, 0, 0))
-
-        # Create a QPainter object to draw on the pixmap
-        painter = QtGui.QPainter(pixmap)
-
-        # Set the pen and brush to red
-        painter.setPen(QtGui.QPen(QtGui.QColor(255, 0, 0)))
-        painter.setBrush(QtGui.QBrush(QtGui.QColor(255, 0, 0)))
-
-        # Draw a circle on the pixmap
-        painter.drawEllipse(4, 4, 24, 24)
-
-        painter.setPen(QtGui.QPen(QtGui.QColor(225, 225, 225)))
-        painter.drawLine(8, 16, 24, 16)
-
-        painter.end()
-
-        # Save the pixmap to an image file
-        pixmap.save("icon_red_circle.png")
-
-        # Create a delete button
-        delete_button = QtWidgets.QPushButton()
-
-        # Set the icon for the delete button
-        delete_button.setIcon(QtGui.QIcon(pixmap))
-
-        # Set the icon size for the delete button
-        delete_button.setIconSize(pixmap.size())
-
-        # Set the icon for the button using the style sheet
-        # delete_button.setStyleSheet("background-image: url(icon.png)")
-
-        # Set the size of the button to match the size of the icon
-        delete_button.setFixedSize(pixmap.size())
-
-        return delete_button
-
-    def delete_add_row_btn(self):
-        # Find the widget in the table widget
-        found = False
-        for row in range(self.table.rowCount()):
-            # for col in range(self.table.columnCount()):
-            widget = self.table.cellWidget(row, 0)
-            if isinstance(widget, QtWidgets.QPushButton):
-                # print(f'Widget found at cell ({row}, {col})')
-                self.table.removeCellWidget(row, 0)
-                found = True
-                break
-            if found:
-                break
-        if not found:
-            print('Widget not found in the table widget')
-
-    def del_row_button_clicked(self, btn):
-
-        pos = btn.pos()
-        index = self.table.indexAt(pos)
-        if index.isValid():
-            # Get the row and column of the cell
-            row = index.row()
-            self.table.removeRow(row)
-        self.table.clearSelection()
 
     def on_calendar_selection_changed(self):
         # Update the table data when the calendar selection changes
@@ -483,9 +368,13 @@ class AddTransactionPopup(QtWidgets.QDialog):
             amount = self.transactions_tree.topLevelItem(row).text(2)
             comment = self.transactions_tree.topLevelItem(row).text(3)
             row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
-            print(f'rowdata {row_data} - {category} - {expense} - {amount} - {comment}')
             if row_data is None:
+                #TODO put this on logic module instead.
                 self.parent().add_new_transaction_signal.emit(category, expense, amount, comment)
+                current_spending = float(self.month_data[category][expense]["Spending"])
+                updated_spending = current_spending + float(amount)
+                self.month_data[category][expense].update({"Spending": updated_spending})
+                self.populate_rows()
 
 
 class AddNewCategoryPopup(QtWidgets.QDialog):
