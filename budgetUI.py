@@ -369,7 +369,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
             comment = self.transactions_tree.topLevelItem(row).text(3)
             row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
             if row_data is None:
-                #TODO put this on logic module instead.
+                # TODO put this on logic module instead.
                 self.parent().add_new_transaction_signal.emit(category, expense, amount, comment)
                 current_spending = float(self.month_data[category][expense]["Spending"])
                 updated_spending = current_spending + float(amount)
