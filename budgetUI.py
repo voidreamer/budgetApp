@@ -126,30 +126,33 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.budget_updated.connect(self.budget.update_budget)
         '''
 
-    def get_data_for_month(self, input_month: str) -> None:
+    def get_data_for_date(self, input_year: str, input_month: str) -> None:
         ''' Populates the tree widget with data from the json file.
 
         :Example:
 
-        data = {
-        ...     "January": {
-        ...         "Category 1": {
-        ...             "Expense 1": {
-        ...                 "Allotted": 100,
-        ...                 "Spending": 50,
-        ...                 "Comment": "This is a comment"
+        data = {"2023": {
+        ...         "January": {
+        ...             "Category 1": {
+        ...                 "Expense 1": {
+        ...                     "Allotted": 100,
+        ...                     "Spending": 50,
+        ...                     "Comment": "This is a comment"
+        ...                 }
         ...             }
         ...         }
         ...     }
-        ... }
+        ...}
         '''
 
         self.tree.clear()
 
-        if self.budget.data.get(input_month) is None:
+        if self.budget.data.get(input_year) is None:
+            return None
+        if self.budget.data.get(input_year).get(input_month) is None:
             return None
 
-        for category, category_data in self.budget.data[input_month].items():
+        for category, category_data in self.budget.data[input_year][input_month].items():
             category_item = BudgetCategoryItem(self.tree)
             category_item.setText(0, category)
             for expense, expenseData in category_data.items():
@@ -168,12 +171,15 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
     def on_calendar_selection_changed(self):
         # Update the table data when the calendar selection changes
+        print(f'month : {self.dateEdit.calendarWidget().selectedDate().toString("yyyy")}')
         print(f'month : {self.dateEdit.calendarWidget().selectedDate().toString("MMMM")}')
-        self.get_data_for_month(self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
+        self.get_data_for_date(self.dateEdit.calendarWidget().selectedDate().toString("yyyy"),
+                               self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
         # self.set_table_data()
 
     def save_tree_data(self):
         # Get the selected month from the calendar widget
+        selected_year = self.dateEdit.calendarWidget().selectedDate().toString("yyyy")
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
 
         # Iterate over the tree and save the data
@@ -204,7 +210,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.budget.save()
 
     def show_add_transaction_popup(self):
-        popup = AddTransactionPopup(self, self.budget, self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
+        popup = AddTransactionPopup(self, self.budget, self.dateEdit.calendarWidget().selectedDate().toString("yyyy"),
+                                    self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
 
     def visualize_data(self):
         # Get the selected month from the calendar widget
@@ -257,18 +264,24 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
 
 class AddTransactionPopup(QtWidgets.QDialog):
-    def __init__(self, parent, budget, month):
+    def __init__(self, parent, budget, year, month):
         super().__init__(parent)
         self.budget = budget
+        self.year = year
         self.month = month
         self.setWindowTitle("Add transaction")
         self.setMinimumWidth(1000)
+        self.setMinimumHeight(200)
 
-        self.month_data = self.budget.data.get(month)
+        self.year_data = self.budget.data.get(year)
+        self.month_data = self.budget.data.get(year).get(month)
+        if self.year_data is None:
+            return
         if self.month_data is None:
             return
 
         self.combo_category = QtWidgets.QComboBox(self)
+        self.combo_category.addItems(self.year_data)
         self.combo_category.addItems(self.month_data)
         self.combo_category.addItem("Add new...")
         self.combo_subcategory = QtWidgets.QComboBox(self)
