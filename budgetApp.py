@@ -25,6 +25,11 @@ class Transaction:
 
 
 class Budget:
+    """
+    The class is managing the database:
+    adding the data if the new expense/category added to the UI
+    saves the update to the database
+    """
     def __init__(self, file_path: str):
         self.file_path = file_path
         self._data = set_json_data(file_path)
@@ -49,8 +54,11 @@ class Budget:
     def transactions(self):
         return self.budget_transactions.transactions
 
-    def add_new_category(self, month: str, category: str, expense: str, allotted: str, comment: str) -> None:
-        month_data = self.data[month]
+    def add_new_category(self, year: str, month: str, category: str, expense: str, allotted: str, comment: str) -> None:
+        """
+        Updates the database when the new expense is added to the UI
+        """
+        month_data = self.data[year][month]
         expense_data = {expense: {"Allotted": allotted,
                                   "Spending": 0,
                                   "Comment": comment}}

@@ -19,6 +19,10 @@ class BudgetData:
 
 
 class BudgetEditorWindow(QtWidgets.QMainWindow):
+    """
+    This class is for managing general aspects of the UI window of a
+    budget app(not the tree widget and it's items)
+    """
     budget_added = QtCore.Signal(dict)
     budget_removed = QtCore.Signal(dict)
     budget_updated = QtCore.Signal(dict)
@@ -183,7 +187,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
 
         # Iterate over the tree and save the data
-        selected_month_data = self.budget.data[selected_month]
+        selected_month_data = self.budget.data[selected_year][selected_month]
         # items = self.tree.findItems("", QtCore.Qt.MatchContains) if parent is None else parent.takeChildren()
         for i in range(self.tree.topLevelItemCount()):
             category_item = self.tree.topLevelItem(i)
@@ -206,7 +210,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                 else:
                     selected_month_data[category_name] = category_update
 
-        self.budget.data[selected_month] = selected_month_data
+        self.budget.data[selected_year][selected_month] = selected_month_data
         self.budget.save()
 
     def show_add_transaction_popup(self):
@@ -281,7 +285,6 @@ class AddTransactionPopup(QtWidgets.QDialog):
             return
 
         self.combo_category = QtWidgets.QComboBox(self)
-        self.combo_category.addItems(self.year_data)
         self.combo_category.addItems(self.month_data)
         self.combo_category.addItem("Add new...")
         self.combo_subcategory = QtWidgets.QComboBox(self)
@@ -391,36 +394,41 @@ class AddTransactionPopup(QtWidgets.QDialog):
 
 
 class AddNewCategoryPopup(QtWidgets.QDialog):
-    def __init__(self, parent,  category: str = None):
+    def __init__(self, parent, category: str = None):
         super().__init__(parent)
         self.budget = parent.budget
         self.setWindowTitle("Add new category")
         self.setMinimumWidth(1000)
 
-        category_name = QtWidgets.QLineEdit(self)
-        category_name.setPlaceholderText("Enter category name...")
-        category_name.setText(category if category != 'Add new...' else None)
+        self.category_name_line_edit = QtWidgets.QLineEdit(self)
+        self.category_name_line_edit.setPlaceholderText("Enter category name...")
+        self.category_name_line_edit.setText(category if category != 'Add new...' else None)
 
-        expense_name = QtWidgets.QLineEdit(self)
-        expense_name.setPlaceholderText("Enter expense name...")
+        self.expense_name_line_edit = QtWidgets.QLineEdit(self)
+        self.expense_name_line_edit.setPlaceholderText("Enter expense name...")
 
-        allotted_amount = QtWidgets.QLineEdit(self)
-        allotted_amount.setPlaceholderText("Enter allotted amount...")
+        self.allotted_amount_line_edit = QtWidgets.QLineEdit(self)
+        self.allotted_amount_line_edit.setPlaceholderText("Enter allotted amount...")
 
-        comment = QtWidgets.QLineEdit(self)
-        comment.setPlaceholderText("Enter comment...")
+        self.timer = QtCore.QTimer(self)
+        self.timer2 = QtCore.QTimer(self)
+
+        self.comment_line_edit = QtWidgets.QLineEdit(self)
+        self.comment_line_edit.setPlaceholderText("Enter comment...")
 
         add_button = QtWidgets.QPushButton("Add", self)
         add_button.clicked.connect(
-            lambda: self.add_new_category(category_name.text(), expense_name.text(),
-                                          allotted_amount.text(), comment.text()))
+            lambda: self.add_new_category(self.category_name_line_edit.text(),
+                                          self.expense_name_line_edit.text(),
+                                          self.allotted_amount_line_edit.text(),
+                                          self.comment_line_edit.text()))
 
         main_layout = QtWidgets.QVBoxLayout()
         input_layout = QtWidgets.QHBoxLayout()
-        input_layout.addWidget(category_name)
-        input_layout.addWidget(expense_name)
-        input_layout.addWidget(allotted_amount)
-        input_layout.addWidget(comment)
+        input_layout.addWidget(self.category_name_line_edit)
+        input_layout.addWidget(self.expense_name_line_edit)
+        input_layout.addWidget(self.allotted_amount_line_edit)
+        input_layout.addWidget(self.comment_line_edit)
         input_layout.addWidget(add_button)
         main_layout.addLayout(input_layout)
 
@@ -431,22 +439,71 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
         self.deleteLater()
 
     def add_new_category(self, category, expense, allotted, comment):
-        tree: QtWidgets.QTreeWidget = self.parent().parent().tree
-        # Search for category if it exists in the tree
-        category_item = None
-        for i in range(tree.topLevelItemCount()):
-            if tree.topLevelItem(i).text(0) == category:
-                category_item = tree.topLevelItem(i)
-                break
+        #self.timer = QtCore.QTimer(self)
+        style = self.category_name_line_edit.styleSheet()
+        if not category:
+            self.category_name_line_edit.setStyleSheet(StyleManager.red_frame_style)
+            self.timer.singleShot(1000, lambda: self.back_to_style(self.category_name_line_edit,
+                                                                   style, category))
+            return
+        if not expense:
+            self.expense_name_line_edit.setStyleSheet(StyleManager.red_frame_style)
+            self.timer.singleShot(1000, lambda: self.back_to_style(self.expense_name_line_edit,
+                                                                   style, expense))
+            return
+        if not allotted:
+            self.allotted_amount_line_edit.setStyleSheet(StyleManager.red_frame_style)
+            self.timer.singleShot(1000, lambda: self.back_to_style(self.allotted_amount_line_edit,
+                                                                   style, allotted))
+            return
+        try:
+            float(allotted)
+        except ValueError:
+            self.allotted_amount_line_edit.setStyleSheet(StyleManager.red_frame_style)
+            self.timer.singleShot(1000, lambda: self.back_to_style(self.allotted_amount_line_edit,
+                                                                   style, allotted))
+            return
 
+        tree: QtWidgets.QTreeWidget = self.parent().parent().tree
+
+        # Search for category if it exists in the tree
+        category_item = tree.find_category_item(category)
         if category_item is None:
             category_item = BudgetCategoryItem(tree)
             category_item.setText(0, category)
-        expense_item = BudgetItem(category_item, expense, float(allotted), 0.0, comment)
-        tree.addTopLevelItem(category_item)
-        self.budget.add_new_category(self.parent().month, category, expense, float(allotted), comment)
-        tree.expandItem(category_item)
-        self.close()
+
+        if comment is None:
+            comment = ""
+
+        expense_item = tree.find_expense_item(category, expense)
+        if expense_item:
+            original_text = self.expense_name_line_edit.text()
+            style_expense = StyleManager.get_temp_text_style("Exists")
+            self.expense_name_line_edit.setStyleSheet(style_expense)
+            self.timer.singleShot(800, lambda: self.back_to_style(self.expense_name_line_edit,
+                                                                  style, original_text))
+            tree.find_allotted_comment_item(category, expense, allotted, comment)
+            style_allotted = StyleManager.get_temp_text_style("Updated")
+            self.allotted_amount_line_edit.setStyleSheet(style_allotted)
+            self.timer.singleShot(800, lambda: self.back_to_style(self.allotted_amount_line_edit,
+                                                                  style, allotted))
+            self.comment_line_edit.setStyleSheet(style_allotted)
+            expense_item.setText(2, allotted)
+            self.timer.singleShot(800, lambda: self.back_to_style(self.comment_line_edit,
+                                                                  style, comment))
+            expense_item.setText(4, comment)
+            return
+        else:
+            expense_item = BudgetItem(category_item, expense, float(allotted), 0.0, comment)
+            self.budget.add_new_category(self.parent().year, self.parent().month,
+                                         category, expense, float(allotted), comment)
+            tree.expandItem(category_item)
+            self.close()
+
+    @staticmethod
+    def back_to_style(widget: QtWidgets.QLineEdit, style: str, text: str) -> None:
+        widget.setStyleSheet(style)
+        widget.setText(text)
 
 
 class BudgetCategoryItem(QtWidgets.QTreeWidgetItem):
@@ -455,6 +512,10 @@ class BudgetCategoryItem(QtWidgets.QTreeWidgetItem):
 
 
 class BudgetItem(QtWidgets.QTreeWidgetItem):
+    """
+    Class to the set QTreeWidgetItem object for the new expense added by user
+    """
+
     def __init__(self, parent, expense: str, allotted: float, spending: float, comment: str):
         super().__init__(parent)
 
@@ -469,13 +530,42 @@ class BudgetItem(QtWidgets.QTreeWidgetItem):
             pass
         else:
             print(f'spending {spending} <= allotted {allotted}')
-            print(spending + 1,  allotted + 1)
+            print(spending + 1, allotted + 1)
+
+
+class BudgetItem2(QtWidgets.QTreeWidgetItem):
+    """
+    Class to the set QTreeWidgetItem object for the new expense added by user
+    """
+
+    def __init__(self, parent, expense: str, allotted: float, spending: float, comment: str):
+        super().__init__(parent)
+
+        self.setData(0, QtCore.Qt.UserRole, BudgetData(expense, allotted, spending, comment))
+        self.setText(1, expense)
+        self.setText(2, str(allotted))
+        self.setText(3, str(spending))
+        self.setText(4, comment)
+
+        if spending > allotted:
+            # print(f'spending {spending} > allotted {allotted}')
+            pass
+        else:
+            print(f'spending {spending} <= allotted {allotted}')
+            print(spending + 1, allotted + 1)
+
+    def isBudgetItem(self, expense):
+        pass
 
 
 class BudgetItemDelegate(QtWidgets.QStyledItemDelegate):
+    """
+    The class paint expense in red if the expense exceeds allotted
+    """
+
     def __init__(self, parent):
         super().__init__(parent=parent)
-        
+
     def paint(self, painter: QtGui.QPainter, option: QtWidgets.QStyleOptionViewItem, index: QtCore.QModelIndex) -> None:
         option.backgroundBrush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         option.font.setBold(True)
@@ -494,6 +584,10 @@ class BudgetItemDelegate(QtWidgets.QStyledItemDelegate):
 
 
 class BudgetTreeWidget(QtWidgets.QTreeWidget):
+    """
+    Class manages QTreeWidget and it's items of the YU
+    """
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -504,6 +598,7 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
             }
             QTreeWidget::item{
                 border: 0;
+                background-color: #222222;
                 background-color: #222222;
                 padding: 10px;
                 border-radius: 10px;
@@ -517,6 +612,58 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
                 background-color: #0492C2;
             }
         """)
+
+    def find_category_item(self, category: str) -> QtWidgets.QTreeWidgetItem:
+        category_item = None
+        for i in range(self.topLevelItemCount()):
+            if self.topLevelItem(i).text(0) == category:
+                category_item = self.topLevelItem(i)
+                break
+        return category_item
+
+    def find_expense_item(self, category: str, expense: str) -> QtWidgets.QTreeWidgetItem:
+        category_item = self.find_category_item(category)
+        if not category_item:
+            return None
+        expense_item = None
+        for i in range(0, category_item.childCount()):
+            if category_item.child(i).text(1) == expense:
+                expense_item = category_item.child(i)
+        return expense_item
+
+    def find_allotted_comment_item(self, category: str,
+                                   expense: str,
+                                   allotted: str,
+                                   comment: str) -> QtWidgets.QTreeWidgetItem:
+        expense_item = self.find_expense_item(category, expense)
+        if not expense_item:
+            return None
+        # for i in range(0, expense_item.childCount()):
+        #     if expense_item.child(i).text(1) == allotted:
+        #         expense_item = category_item.child(i)
+        # return expense_item
+
+
+class StyleManager:
+    default_style = ""
+    red_frame_style = """
+            QLineEdit {
+                border: 2px solid red;
+                border-radius: 4px;
+                padding: 2px;
+            }
+        """
+
+    @staticmethod
+    def get_temp_text_style(message: str) -> str:
+        temp_text_style = """
+            QLineEdit {{
+                color: red;
+                qproperty-text: "{}"; 
+                text-align: right; 
+                }}
+            """.format(message)
+        return temp_text_style
 
 
 def set_dark_theme():
