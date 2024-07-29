@@ -75,6 +75,9 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.add_transaction_button = QtWidgets.QPushButton('Add transaction')
         self.add_transaction_button.clicked.connect(self.show_add_transaction_popup)
 
+        self.add_delete_button = QtWidgets.QPushButton('Delete')
+        self.add_delete_button.clicked.connect(self.delete_row)
+
         self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.category_btn = QtWidgets.QPushButton('Add category')
@@ -87,6 +90,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.add_transaction_button)
+        button_layout.addWidget(self.add_delete_button)
         button_layout.addWidget(self.visualize_button)
         layout.addLayout(button_layout)
 
@@ -266,6 +270,9 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
 
+    def delete_row(self):
+        self.tree.remove_currently_selected()
+
 
 class AddTransactionPopup(QtWidgets.QDialog):
     def __init__(self, parent, budget, year, month):
@@ -286,7 +293,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
 
         self.combo_category = QtWidgets.QComboBox(self)
         self.combo_category.addItems(self.month_data)
-        self.combo_category.addItem("Add new...")
+        self.combo_category.addItem("Add/Edit...")
         self.combo_subcategory = QtWidgets.QComboBox(self)
         self.combo_subcategory.setObjectName('combo_expense')
 
@@ -482,7 +489,7 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
             self.expense_name_line_edit.setStyleSheet(style_expense)
             self.timer.singleShot(800, lambda: self.back_to_style(self.expense_name_line_edit,
                                                                   style, original_text))
-            tree.find_allotted_comment_item(category, expense, allotted, comment)
+            #tree.find_allotted_comment_item(category, expense, allotted, comment)
             style_allotted = StyleManager.get_temp_text_style("Updated")
             self.allotted_amount_line_edit.setStyleSheet(style_allotted)
             self.timer.singleShot(800, lambda: self.back_to_style(self.allotted_amount_line_edit,
@@ -631,19 +638,22 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
                 expense_item = category_item.child(i)
         return expense_item
 
-    def find_allotted_comment_item(self, category: str,
-                                   expense: str,
-                                   allotted: str,
-                                   comment: str) -> QtWidgets.QTreeWidgetItem:
-        expense_item = self.find_expense_item(category, expense)
-        if not expense_item:
-            return None
-        # for i in range(0, expense_item.childCount()):
-        #     if expense_item.child(i).text(1) == allotted:
-        #         expense_item = category_item.child(i)
-        # return expense_item
+    def remove_currently_selected(self):
+        """
+        Removes currently selected
+        """
 
-
+        current_item = self.currentItem()
+        if current_item:
+            parent = current_item.parent()
+            if parent:
+                index = parent.indexOfChild(current_item)
+                removed_item = parent.takeChild(index)
+            else:
+                # It's a top-level item
+                index = self.indexOfTopLevelItem(current_item)
+                removed_item = self.takeTopLevelItem(index)
+            del removed_item  # Optional: explicitly delete the item
 class StyleManager:
     default_style = ""
     red_frame_style = """
