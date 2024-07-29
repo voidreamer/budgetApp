@@ -28,6 +28,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
     budget_updated = QtCore.Signal(dict)
     add_new_transaction_signal = QtCore.Signal(str, str, str, str)
     del_transaction_signal = QtCore.Signal(dict)
+    del_row_signal = QtCore.Signal(str, str, str, str)
 
     def __init__(self, budget):
         super().__init__()
@@ -128,6 +129,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.combo_category = None
         self.combo_subcategory = None
 
+        self.add_new_transaction_signal.connect(self.tree_update_spending)
         '''
         self.budget_added.connect(self.budget.add_budget)
         self.budget_removed.connect(self.budget.remove_budget)
@@ -270,8 +272,17 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
 
+    def tree_update_spending(self, *args):
+        self.tree.update_expense_spending(*args)
+
     def delete_row(self):
-        self.tree.remove_currently_selected()
+        # TODO: also need to update the data thing
+        selected_year = self.dateEdit.calendarWidget().selectedDate().toString("yyyy")
+        selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
+        self.tree.remove_currently_selected(selected_year, selected_month)
+        #TODO: emit signal with data to what the thing is
+        #if category - send delete category
+        #if expense - send delete expense
 
 
 class AddTransactionPopup(QtWidgets.QDialog):
@@ -393,11 +404,11 @@ class AddTransactionPopup(QtWidgets.QDialog):
             row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
             if row_data is None:
                 # TODO put this on logic module instead.
-                self.parent().add_new_transaction_signal.emit(category, expense, amount, comment)
                 current_spending = float(self.month_data[category][expense]["Spending"])
                 updated_spending = current_spending + float(amount)
                 self.month_data[category][expense].update({"Spending": updated_spending})
                 self.populate_rows()
+                self.parent().add_new_transaction_signal.emit(category, expense, str(updated_spending), comment)
 
 
 class AddNewCategoryPopup(QtWidgets.QDialog):
@@ -540,31 +551,6 @@ class BudgetItem(QtWidgets.QTreeWidgetItem):
             print(spending + 1, allotted + 1)
 
 
-class BudgetItem2(QtWidgets.QTreeWidgetItem):
-    """
-    Class to the set QTreeWidgetItem object for the new expense added by user
-    """
-
-    def __init__(self, parent, expense: str, allotted: float, spending: float, comment: str):
-        super().__init__(parent)
-
-        self.setData(0, QtCore.Qt.UserRole, BudgetData(expense, allotted, spending, comment))
-        self.setText(1, expense)
-        self.setText(2, str(allotted))
-        self.setText(3, str(spending))
-        self.setText(4, comment)
-
-        if spending > allotted:
-            # print(f'spending {spending} > allotted {allotted}')
-            pass
-        else:
-            print(f'spending {spending} <= allotted {allotted}')
-            print(spending + 1, allotted + 1)
-
-    def isBudgetItem(self, expense):
-        pass
-
-
 class BudgetItemDelegate(QtWidgets.QStyledItemDelegate):
     """
     The class paint expense in red if the expense exceeds allotted
@@ -638,22 +624,46 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
                 expense_item = category_item.child(i)
         return expense_item
 
-    def remove_currently_selected(self):
+    def remove_currently_selected(self, year, month):
         """
         Removes currently selected
         """
-
+        # TODO: remove item from the database
         current_item = self.currentItem()
         if current_item:
-            parent = current_item.parent()
-            if parent:
-                index = parent.indexOfChild(current_item)
-                removed_item = parent.takeChild(index)
+            parent_item = current_item.parent()
+            if parent_item:
+                index = parent_item.indexOfChild(current_item)
+                category = parent_item.text(0)
+                removed_item = parent_item.takeChild(index)
+                self.parent.del_row_signal.emit(year,
+                                                month,
+                                                category,
+                                                removed_item.text(1))
+                del removed_item
             else:
                 # It's a top-level item
                 index = self.indexOfTopLevelItem(current_item)
                 removed_item = self.takeTopLevelItem(index)
-            del removed_item  # Optional: explicitly delete the item
+                self.parent.del_row_signal.emit(year,
+                                                  month,
+                                                  removed_item.text(0),
+                                                  None)
+                del removed_item
+
+    def update_expense_spending(self, *args):
+        """
+        *args passed to this method(slot) by the add_new_transaction_signal
+        Signal of the parent BudgetEditorWindow:
+            category: str
+            expense: str
+            amount: float/str
+            comment: str
+        """
+        item = self.find_expense_item(args[0], args[1])
+        item.setText(3, args[2])
+
+
 class StyleManager:
     default_style = ""
     red_frame_style = """

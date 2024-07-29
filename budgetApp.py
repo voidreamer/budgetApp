@@ -30,6 +30,7 @@ class Budget:
     adding the data if the new expense/category added to the UI
     saves the update to the database
     """
+
     def __init__(self, file_path: str):
         self.file_path = file_path
         self._data = set_json_data(file_path)
@@ -41,6 +42,7 @@ class Budget:
         budget_editor.show()
         budget_editor.add_new_transaction_signal.connect(self.add_new_transaction)
         budget_editor.del_transaction_signal.connect(self.del_transaction)
+        budget_editor.del_row_signal.connect(self.delete_category)
 
     @property
     def data(self):
@@ -67,6 +69,17 @@ class Budget:
         else:
             month_data[category] = expense_data
         self.data[month] = month_data
+
+    def delete_category(self, *args):
+        year = args[0]
+        month = args[1]
+        category = args[2]
+        expense = args[3]
+        data_expense = self.data.get(year).get(month).get(category).get(expense)
+        if data_expense:
+            del self.data[year][month][category][expense]
+        else:
+            del self.data[year][month][category]
 
     def add_new_transaction(self, *args, **kwargs) -> None:
         self.budget_transactions.add_new_transaction(*args)
