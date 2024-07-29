@@ -39,7 +39,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.restoreState(settings.value("windowState"))
 
         # Initialize UI.
-        self.setWindowTitle('No Bullshit Budget')
+        self.setWindowTitle('Budget Test')
         self.setMinimumSize(1280, 720)
         # Create a calendar widget
         self.dateEdit = QtWidgets.QDateEdit(self)
@@ -225,10 +225,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
     def visualize_data(self):
         # Get the selected month from the calendar widget
+        selectedYear = self.dateEdit.calendarWidget().selectedDate().toString('yyyy')
         selectedMonth = self.dateEdit.calendarWidget().selectedDate().toString('MMMM')
 
         # Filter the data to only include the selected month
-        data = self.budget.data.get(selectedMonth)
+        data = self.budget.data.get(selectedYear).get(selectedMonth)
         if data is None:
             return
 
@@ -628,7 +629,6 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
         """
         Removes currently selected
         """
-        # TODO: remove item from the database
         current_item = self.currentItem()
         if current_item:
             parent_item = current_item.parent()
