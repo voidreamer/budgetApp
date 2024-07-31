@@ -193,7 +193,10 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
 
         # Iterate over the tree and save the data
-        selected_month_data = self.budget.data[selected_year][selected_month]
+        try:
+            selected_month_data = self.budget.data[selected_year][selected_month]
+        except KeyError as e:
+            print("Nothing to save")
         # items = self.tree.findItems("", QtCore.Qt.MatchContains) if parent is None else parent.takeChildren()
         for i in range(self.tree.topLevelItemCount()):
             category_item = self.tree.topLevelItem(i)
@@ -277,16 +280,14 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.tree.update_expense_spending(*args)
 
     def delete_row(self):
-        # TODO: also need to update the data thing
         selected_year = self.dateEdit.calendarWidget().selectedDate().toString("yyyy")
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
         self.tree.remove_currently_selected(selected_year, selected_month)
-        #TODO: emit signal with data to what the thing is
-        #if category - send delete category
-        #if expense - send delete expense
 
 
 class AddTransactionPopup(QtWidgets.QDialog):
+    category_popup_closed = QtCore.Signal(str, str)
+
     def __init__(self, parent, budget, year, month):
         super().__init__(parent)
         self.budget = budget
@@ -296,12 +297,17 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.setMinimumWidth(1000)
         self.setMinimumHeight(200)
 
-        self.year_data = self.budget.data.get(year)
-        self.month_data = self.budget.data.get(year).get(month)
-        if self.year_data is None:
-            return
-        if self.month_data is None:
-            return
+        try:
+            self.year_data = self.budget.data[year]
+        except KeyError:
+            self.budget.data[year] = {}
+            self.year_data = self.budget.data[year]
+
+        try:
+            self.month_data = self.budget.data[year][month]
+        except KeyError:
+            self.budget.data[year][month] = {}
+            self.month_data = self.budget.data[year][month]
 
         self.combo_category = QtWidgets.QComboBox(self)
         self.combo_category.addItems(self.month_data)
@@ -309,9 +315,13 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.combo_subcategory = QtWidgets.QComboBox(self)
         self.combo_subcategory.setObjectName('combo_expense')
 
-        self.combo_category.currentIndexChanged.connect(self.populate_subcategories)
-        self.combo_subcategory.currentIndexChanged.connect(self.add_new_category)
+        # activated signal triggers even when press the same item
+        # this is needed when the only option is "Add/Edit..."
+        self.combo_category.activated.connect(self.populate_subcategories)
+        # self.combo_category.activated.connect(self.check_if_works)
+        self.combo_subcategory.activated.connect(self.add_new_category)
         self.combo_category.setCurrentIndex(1)
+        self.category_popup_closed.connect(self.select_new_categories)
 
         transaction_amount = QtWidgets.QLineEdit(self)
         transaction_amount.setPlaceholderText("Enter amount")
@@ -352,8 +362,19 @@ class AddTransactionPopup(QtWidgets.QDialog):
     def add_new_category(self, sender=None):
         sender = self.sender() or sender
         text = sender.currentText()
-        if text == "Add new...":
-            AddNewCategoryPopup(self, self.combo_category.currentText())
+        if text == "Add/Edit...":
+            AddNewCategoryPopup(self)
+            # TODO: after adding new category need to set the combobox
+
+    def select_new_categories(self, *args):
+        category = args[0]
+        self.combo_category.addItem(category)
+        expense = args[1]
+        self.combo_subcategory.addItem(expense)
+        index_cat = self.combo_category.findText(category, QtCore.Qt.MatchFlag.MatchExactly)
+        index_exp = self.combo_subcategory.findText(expense, QtCore.Qt.MatchFlag.MatchExactly)
+        self.combo_category.setCurrentIndex(index_cat)
+        self.combo_subcategory.setCurrentIndex(index_exp)
 
     def add_transaction(self, category, expense, amount, comment):
         # Create a new QTreeWidgetItem with the data values
@@ -369,14 +390,16 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.parent().del_transaction_signal.emit(data)
 
     def populate_subcategories(self):
-        if self.sender().currentText() == "Add new...":
+        if self.sender().currentText() == "Add/Edit...":
             self.add_new_category(self.sender())
-            return
-        subcategories = self.month_data[self.combo_category.currentText()]
-        if self.combo_subcategory is not None:
+        subcategories = self.month_data.get(self.combo_category.currentText())
+        if self.combo_subcategory and subcategories:
             self.combo_subcategory.clear()
             self.combo_subcategory.addItems(subcategories)
-            self.combo_subcategory.addItem("Add new...")
+
+        index = self.combo_subcategory.findText("Add/Edit...")
+        if index == -1:
+            self.combo_subcategory.insertItem(0, "Add/Edit...")
 
     def populate_rows(self):
         for row, transaction in enumerate(self.budget.transactions):
@@ -458,7 +481,8 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
         self.deleteLater()
 
     def add_new_category(self, category, expense, allotted, comment):
-        #self.timer = QtCore.QTimer(self)
+        # This block of code checks that we are not adding "empty"
+        # expense/category/allotted amount
         style = self.category_name_line_edit.styleSheet()
         if not category:
             self.category_name_line_edit.setStyleSheet(StyleManager.red_frame_style)
@@ -483,9 +507,10 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
                                                                    style, allotted))
             return
 
+        # This part of the code checks if we already have the category created
+        # if we don't it will create a new
         tree: QtWidgets.QTreeWidget = self.parent().parent().tree
 
-        # Search for category if it exists in the tree
         category_item = tree.find_category_item(category)
         if category_item is None:
             category_item = BudgetCategoryItem(tree)
@@ -494,6 +519,9 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
         if comment is None:
             comment = ""
 
+        # This part of the code checks if such expense item already exists
+        # if it does not it creates the expense if it does it updates
+        # allotted and comment
         expense_item = tree.find_expense_item(category, expense)
         if expense_item:
             original_text = self.expense_name_line_edit.text()
@@ -501,7 +529,6 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
             self.expense_name_line_edit.setStyleSheet(style_expense)
             self.timer.singleShot(800, lambda: self.back_to_style(self.expense_name_line_edit,
                                                                   style, original_text))
-            #tree.find_allotted_comment_item(category, expense, allotted, comment)
             style_allotted = StyleManager.get_temp_text_style("Updated")
             self.allotted_amount_line_edit.setStyleSheet(style_allotted)
             self.timer.singleShot(800, lambda: self.back_to_style(self.allotted_amount_line_edit,
@@ -517,12 +544,19 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
             self.budget.add_new_category(self.parent().year, self.parent().month,
                                          category, expense, float(allotted), comment)
             tree.expandItem(category_item)
+            self.parent().category_popup_closed.emit(category, expense)
             self.close()
 
     @staticmethod
     def back_to_style(widget: QtWidgets.QLineEdit, style: str, text: str) -> None:
         widget.setStyleSheet(style)
         widget.setText(text)
+
+    # def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+    #     print("close event")
+    #     category = self.category_name_line_edit.text()
+    #     expense = self.expense_name_line_edit.text()
+    #     self.parent().category_popup_closed.emit(category, expense)
 
 
 class BudgetCategoryItem(QtWidgets.QTreeWidgetItem):
@@ -646,9 +680,9 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
                 index = self.indexOfTopLevelItem(current_item)
                 removed_item = self.takeTopLevelItem(index)
                 self.parent.del_row_signal.emit(year,
-                                                  month,
-                                                  removed_item.text(0),
-                                                  None)
+                                                month,
+                                                removed_item.text(0),
+                                                None)
                 del removed_item
 
     def update_expense_spending(self, *args):
