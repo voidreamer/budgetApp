@@ -361,11 +361,17 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.exec_()
 
     def add_new_category(self, sender=None):
+        # TODO: please fix the logic of this for a better one, it's easy
         sender = self.sender() or sender
         text = sender.currentText()
-        if text == "Add/Edit...":
+        if text == "Add/Edit..." and sender == self.combo_category:
             AddNewCategoryPopup(self)
-            # TODO: after adding new category need to set the combobox
+        elif text == "Add/Edit..." and sender == self.combo_subcategory:
+            category = self.combo_category.currentText()
+            if category == "Add/Edit...":
+                AddNewCategoryPopup(self)
+            else:
+                AddNewCategoryPopup(self, category)
 
     def select_new_categories(self, *args):
         category = args[0]
