@@ -193,6 +193,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
 
         # Iterate over the tree and save the data
+        selected_month_data = {}
         try:
             selected_month_data = self.budget.data[selected_year][selected_month]
         except KeyError as e:
@@ -544,7 +545,7 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
             self.budget.add_new_category(self.parent().year, self.parent().month,
                                          category, expense, float(allotted), comment)
             tree.expandItem(category_item)
-            self.parent().category_popup_closed.emit(category, expense)
+            #self.parent().category_popup_closed.emit(category, expense)
             self.close()
 
     @staticmethod

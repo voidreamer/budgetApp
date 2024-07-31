@@ -67,8 +67,9 @@ class Budget:
         if category in month_data:
             month_data[category].update(expense_data)
         else:
+
             month_data[category] = expense_data
-        self.data[month] = month_data
+        self.data[year][month] = month_data
 
     def delete_category(self, *args):
         year = args[0]
