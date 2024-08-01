@@ -38,11 +38,15 @@ class Budget:
 
         from budgetUI import BudgetEditorWindow
 
-        budget_editor = BudgetEditorWindow(self)
-        budget_editor.show()
-        budget_editor.add_new_transaction_signal.connect(self.add_new_transaction)
-        budget_editor.del_transaction_signal.connect(self.del_transaction)
-        budget_editor.del_row_signal.connect(self.delete_category)
+        self.budget_editor = BudgetEditorWindow(self)
+        self.budget_editor.show()
+        self.budget_editor.add_new_transaction_signal.connect(self.add_new_transaction)
+        self.budget_editor.del_transaction_signal.connect(self.del_transaction)
+        self.budget_editor.del_row_signal.connect(self.delete_category)
+
+    def add_new_transaction(self, category: str, expense: str, amount: float, comment: str) -> None:
+        self.budget_transactions.add_new_transaction(category, expense, amount, comment)
+        self.update_spending(category, expense, amount)
 
     @property
     def data(self):
@@ -82,17 +86,30 @@ class Budget:
         else:
             del self.data[year][month][category]
 
-    def add_new_transaction(self, *args, **kwargs) -> None:
-        self.budget_transactions.add_new_transaction(*args)
-
-    def del_transaction(self, transaction: Dict[str, str]) -> None:
-        if transaction is None:
-            return
-        self.budget_transactions.del_transaction(Transaction(**transaction))
+    def del_transaction(self, transaction_id: str) -> None:
+        transaction = next((t for t in self.transactions if t.id == transaction_id), None)
+        if transaction:
+            self.budget_transactions.del_transaction(transaction)
+            self.update_spending(transaction.category, transaction.expense, -transaction.amount)
 
     def save(self):
         with open(self.file_path, 'w') as jsonfile:
-            json.dump(self.data, jsonfile, indent=4)
+            json.dump(self._data, jsonfile, indent=4)
+
+    def update_spending(self, category: str, expense: str, amount: float) -> None:
+        year = self.budget_editor.dateEdit.date().toString("yyyy")
+        month = self.budget_editor.dateEdit.date().toString("MMMM")
+
+        if year not in self._data:
+            self._data[year] = {}
+        if month not in self._data[year]:
+            self._data[year][month] = {}
+        if category not in self._data[year][month]:
+            self._data[year][month][category] = {}
+        if expense not in self._data[year][month][category]:
+            self._data[year][month][category][expense] = {"Spending": 0, "Allotted": 0}
+
+        self._data[year][month][category][expense]["Spending"] += amount
 
 
 @dataclass

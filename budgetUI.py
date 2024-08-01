@@ -287,8 +287,6 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
 
 class AddTransactionPopup(QtWidgets.QDialog):
-    category_popup_closed = QtCore.Signal(str, str)
-
     def __init__(self, parent, budget, year, month):
         super().__init__(parent)
         self.budget = budget
@@ -322,7 +320,6 @@ class AddTransactionPopup(QtWidgets.QDialog):
         # self.combo_category.activated.connect(self.check_if_works)
         self.combo_subcategory.activated.connect(self.add_new_category)
         self.combo_category.setCurrentIndex(1)
-        self.category_popup_closed.connect(self.select_new_categories)
 
         transaction_amount = QtWidgets.QLineEdit(self)
         transaction_amount.setPlaceholderText("Enter amount")
@@ -345,6 +342,9 @@ class AddTransactionPopup(QtWidgets.QDialog):
         delete_button = QtWidgets.QPushButton("Delete selected", self)
         delete_button.clicked.connect(self.delete_transaction)
 
+        self.save_commit_button = QtWidgets.QPushButton("Save and Commit", self)
+        self.save_commit_button.clicked.connect(self.save_and_commit)
+
         main_layout = QtWidgets.QVBoxLayout()
         input_layout = QtWidgets.QHBoxLayout()
         input_layout.addWidget(self.combo_category)
@@ -353,6 +353,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
         input_layout.addWidget(transaction_comment)
         input_layout.addWidget(add_button)
         input_layout.addWidget(delete_button)
+        input_layout.addWidget(self.save_commit_button)
         main_layout.addLayout(input_layout)
         main_layout.addLayout(tree_layout)
 
@@ -384,17 +385,15 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.combo_subcategory.setCurrentIndex(index_exp)
 
     def add_transaction(self, category, expense, amount, comment):
-        # Create a new QTreeWidgetItem with the data values
-        item = QtWidgets.QTreeWidgetItem([category, expense, str(amount), comment])
-        # Add the item to the tree widget
-        self.transactions_tree.addTopLevelItem(item)
+        self.budget.add_new_transaction(category, expense, float(amount), comment)
+        self.populate_rows()
 
     def delete_transaction(self):
         transaction_item = self.transactions_tree.currentItem()
-        transaction_index = self.transactions_tree.indexOfTopLevelItem(transaction_item)
-        data = transaction_item.data(0, QtCore.Qt.UserRole)
-        self.transactions_tree.takeTopLevelItem(transaction_index)
-        self.parent().del_transaction_signal.emit(data)
+        if transaction_item:
+            transaction_id = transaction_item.data(0, QtCore.Qt.UserRole)
+            self.budget.del_transaction(transaction_id)
+            self.populate_rows()
 
     def populate_subcategories(self):
         if self.sender().currentText() == "Add/Edit...":
@@ -409,37 +408,23 @@ class AddTransactionPopup(QtWidgets.QDialog):
             self.combo_subcategory.insertItem(0, "Add/Edit...")
 
     def populate_rows(self):
-        for row, transaction in enumerate(self.budget.transactions):
-            item = QtWidgets.QTreeWidgetItem(
-                [transaction.category, transaction.expense, str(transaction.amount), transaction.comment])
-            data = {"id": transaction.id,
-                    "category": transaction.category,
-                    "expense": transaction.expense,
-                    "amount": transaction.amount,
-                    "comment": transaction.comment}
+        self.transactions_tree.clear()
+        for transaction in self.budget.transactions:
+            item = QtWidgets.QTreeWidgetItem([
+                transaction.category,
+                transaction.expense,
+                str(transaction.amount),
+                transaction.comment
+            ])
+            item.setData(0, QtCore.Qt.UserRole, transaction.id)
             self.transactions_tree.addTopLevelItem(item)
 
-            item.setData(0, QtCore.Qt.UserRole, data)
-            item.setText(0, item.text(0))
-            item.setText(1, item.text(1))
-            item.setText(2, item.text(2))
-            item.setText(3, item.text(3))
-            item.setText(3, item.text(4))
+    def save_and_commit(self):
+        self.budget.save()
+        self.close()
 
-    def closeEvent(self, arg__1: QtGui.QCloseEvent) -> None:
-        for row in range(self.transactions_tree.topLevelItemCount()):
-            category = self.transactions_tree.topLevelItem(row).text(0)
-            expense = self.transactions_tree.topLevelItem(row).text(1)
-            amount = self.transactions_tree.topLevelItem(row).text(2)
-            comment = self.transactions_tree.topLevelItem(row).text(3)
-            row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
-            if row_data is None:
-                # TODO put this on logic module instead.
-                current_spending = float(self.month_data[category][expense]["Spending"])
-                updated_spending = current_spending + float(amount)
-                self.month_data[category][expense].update({"Spending": updated_spending})
-                self.populate_rows()
-                self.parent().add_new_transaction_signal.emit(category, expense, str(updated_spending), comment)
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        super().closeEvent(event)
 
 
 class AddNewCategoryPopup(QtWidgets.QDialog):
