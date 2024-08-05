@@ -726,9 +726,8 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
 
     def update_expense_spending(self, data):
         """
-        *args passed to this method(slot) by the add_new_transaction_signal
-        Signal of the parent BudgetEditorWindow:
-str
+        data passed to this method(slot) by the add_new_transaction_signal
+        Signal of the parent BudgetEditorWindow: str
         """
         print(data)
         for key, value in data.items():
