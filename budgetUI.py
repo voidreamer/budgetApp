@@ -129,7 +129,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.combo_category = None
         self.combo_subcategory = None
 
-        self.add_new_transaction_signal.connect(self.tree_update_spending)
+        #self.add_new_transaction_signal.connect(self.tree_update_spending)
         '''
         self.budget_added.connect(self.budget.add_budget)
         self.budget_removed.connect(self.budget.remove_budget)
@@ -277,8 +277,8 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         # Update the graph on the FigureCanvasQTAgg object
         self.figure_canvas.draw()
 
-    def tree_update_spending(self, *args):
-        self.tree.update_expense_spending(*args)
+    def tree_update_spending(self, month_data):
+        self.tree.update_expense_spending(month_data)
 
     def delete_row(self):
         selected_year = self.dateEdit.calendarWidget().selectedDate().toString("yyyy")
@@ -297,6 +297,8 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.setWindowTitle("Add transaction")
         self.setMinimumWidth(1000)
         self.setMinimumHeight(200)
+
+        self.timer = QtCore.QTimer(self)
 
         try:
             self.year_data = self.budget.data[year]
@@ -342,8 +344,8 @@ class AddTransactionPopup(QtWidgets.QDialog):
         delete_button = QtWidgets.QPushButton("Delete selected", self)
         delete_button.clicked.connect(self.delete_transaction)
 
-        update_button = QtWidgets.QPushButton("Update budget", self)
-        update_button.clicked.connect(self.update_budget_with_transactions)
+        self.update_button = QtWidgets.QPushButton("Update budget", self)
+        self.update_button.clicked.connect(self.update_budget_with_transactions)
 
         main_layout = QtWidgets.QVBoxLayout()
         input_layout = QtWidgets.QHBoxLayout()
@@ -355,7 +357,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
         input_layout.addWidget(add_button)
         input_layout.addWidget(delete_button)
         tree_layout.addWidget(self.transactions_tree)
-        tree_layout.addWidget(update_button)
+        tree_layout.addWidget(self.update_button)
         main_layout.addLayout(input_layout)
         main_layout.addLayout(tree_layout)
 
@@ -394,14 +396,24 @@ class AddTransactionPopup(QtWidgets.QDialog):
         # Add the item to the tree widget
         self.transactions_tree.addTopLevelItem(item)
         # TODO: add transaction to budget_transactions
+        self.parent().add_new_transaction_signal.emit(category,
+                                                      expense,
+                                                      str(amount),
+                                                      comment)
+        item.setData(0, QtCore.Qt.UserRole, "placeholder")
         #self.budget.transactions.add_new_transaction(category, expense, str(amount), comment)
 
     def delete_transaction(self):
         transaction_item = self.transactions_tree.currentItem()
         transaction_index = self.transactions_tree.indexOfTopLevelItem(transaction_item)
         data = transaction_item.data(0, QtCore.Qt.UserRole)
-        self.transactions_tree.takeTopLevelItem(transaction_index)
-        self.parent().del_transaction_signal.emit(data)
+        if data == "placeholder":
+            # the budget has to be updated before any transaction can be deleted
+            print("Update the budget")
+            return
+        else:
+            self.transactions_tree.takeTopLevelItem(transaction_index)
+            self.parent().del_transaction_signal.emit(data)
 
     def populate_subcategories(self):
         if self.sender().currentText() == "Add/Edit...":
@@ -419,7 +431,7 @@ class AddTransactionPopup(QtWidgets.QDialog):
         self.transactions_tree.clear()
         for row, transaction in enumerate(self.budget.transactions):
             item = QtWidgets.QTreeWidgetItem(
-                [transaction.category, transaction.expense, str(transaction.amount), transaction.comment])
+                [transaction.category, transaction.expense, str(float(transaction.amount)), transaction.comment])
             data = {"id": transaction.id,
                     "category": transaction.category,
                     "expense": transaction.expense,
@@ -432,45 +444,35 @@ class AddTransactionPopup(QtWidgets.QDialog):
             item.setText(1, item.text(1))
             item.setText(2, item.text(2))
             item.setText(3, item.text(3))
-            item.setText(3, item.text(4))
+            #item.setText(3, item.text(4))
 
     def update_budget_with_transactions(self):
+        #updated_spending = float(0)
+        updated_spending = {}
+        for row in range(self.transactions_tree.topLevelItemCount()):
+            category = self.transactions_tree.topLevelItem(row).text(0)
+            updated_spending.update({category: {}})
+
+        for row in range(self.transactions_tree.topLevelItemCount()):
+            category = self.transactions_tree.topLevelItem(row).text(0)
+            expense = self.transactions_tree.topLevelItem(row).text(1)
+            for row1 in range(self.transactions_tree.topLevelItemCount()):
+                expense = self.transactions_tree.topLevelItem(row).text(1)
+                if self.transactions_tree.topLevelItem(row).text(0) == category:
+                    updated_spending[category].update({expense: float(0)})
+
         for row in range(self.transactions_tree.topLevelItemCount()):
             category = self.transactions_tree.topLevelItem(row).text(0)
             expense = self.transactions_tree.topLevelItem(row).text(1)
             amount = self.transactions_tree.topLevelItem(row).text(2)
             comment = self.transactions_tree.topLevelItem(row).text(3)
             row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
-            if row_data is None:
-                # TODO put this on logic module instead.
-                #current_spending = float(self.month_data[category][expense]["Spending"])
-                updated_spending = float(amount)
-                self.month_data[category][expense].update({"Spending": updated_spending})
-                #self.populate_rows()
-                self.parent().add_new_transaction_signal.emit(category,
-                                                              expense,
-                                                              str(updated_spending),
-                                                              comment)
-                # temporary solution, will be improved when database created
-                self.transactions_tree.topLevelItem(row).setData(0, QtCore.Qt.UserRole, "placeholder")
+            updated_spending[category][expense] += float(amount)
+            #     # TODO put this on logic module instead.
 
-    # def closeEvent(self, arg__1: QtGui.QCloseEvent) -> None:
-    # for row in range(self.transactions_tree.topLevelItemCount()):
-    #     category = self.transactions_tree.topLevelItem(row).text(0)
-    #     expense = self.transactions_tree.topLevelItem(row).text(1)
-    #     amount = self.transactions_tree.topLevelItem(row).text(2)
-    #     comment = self.transactions_tree.topLevelItem(row).text(3)
-    #     row_data = self.transactions_tree.topLevelItem(row).data(0, QtCore.Qt.UserRole)
-    #     if row_data is None:
-    #         # TODO put this on logic module instead.
-    #         current_spending = float(self.month_data[category][expense]["Spending"])
-    #         updated_spending = current_spending + float(amount)
-    #         self.month_data[category][expense].update({"Spending": updated_spending})
-    #         self.populate_rows()
-    #         self.parent().add_new_transaction_signal.emit(category,
-    #                                                       expense,
-    #                                                       str(updated_spending),
-    #                                                       comment)
+        self.month_data[category][expense].update({"Spending": updated_spending[category][expense]})
+        self.parent().tree_update_spending(updated_spending)
+        self.populate_rows()
 
 
 class AddNewCategoryPopup(QtWidgets.QDialog):
@@ -491,7 +493,6 @@ class AddNewCategoryPopup(QtWidgets.QDialog):
         self.allotted_amount_line_edit.setPlaceholderText("Enter allotted amount...")
 
         self.timer = QtCore.QTimer(self)
-        self.timer2 = QtCore.QTimer(self)
 
         self.comment_line_edit = QtWidgets.QLineEdit(self)
         self.comment_line_edit.setPlaceholderText("Enter comment...")
@@ -723,19 +724,17 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
                                                 None)
                 del removed_item
 
-    def update_expense_spending(self, *args):
+    def update_expense_spending(self, data):
         """
         *args passed to this method(slot) by the add_new_transaction_signal
         Signal of the parent BudgetEditorWindow:
-            category: str
-            expense: str
-            amount: float/str
-            comment: str
+str
         """
-        item = self.find_expense_item(args[0], args[1])
-        current_spending = float(item.text(3))
-        new_spending = current_spending + float(args[2])
-        item.setText(3, str(new_spending))
+        print(data)
+        for key, value in data.items():
+            for key1, value1 in value.items():
+                tree_item = self.find_expense_item(key, key1)
+                tree_item.setText(3, str(value1))
 
 
 class StyleManager:
