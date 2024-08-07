@@ -78,6 +78,7 @@ class Budget:
         expense = args[3]
         data_expense = self.data.get(year).get(month).get(category).get(expense)
         if data_expense:
+            print("deleting expense")
             del self.data[year][month][category][expense]
         else:
             del self.data[year][month][category]

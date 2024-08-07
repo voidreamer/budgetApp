@@ -48,12 +48,16 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.dateEdit.setCalendarPopup(True)
         self.dateEdit.calendarWidget().selectionChanged.connect(self.on_calendar_selection_changed)
 
+        self.transferBtn = QtWidgets.QPushButton('Transfer From Previous')
+        self.transferBtn.clicked.connect(self.transfer_from_previous_month)
+
         # Create a QTreeWidget
         self.tree = BudgetTreeWidget(self)
         self.tree.setItemDelegate(BudgetItemDelegate(self.tree))
         self.tree.setColumnCount(5)
         self.tree.header().setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
         self.tree.header().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
+        self.tree.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         self.tree.setHeaderLabels(
             ['Category', 'Expense', 'Allotted', 'Spending', 'Comment'])
 
@@ -73,11 +77,11 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.visualize_button = QtWidgets.QPushButton('Visualize graph')
         self.visualize_button.clicked.connect(self.visualize_data)
 
-        self.add_transaction_button = QtWidgets.QPushButton('Add transaction')
+        self.add_transaction_button = QtWidgets.QPushButton('Add/Edit transaction')
         self.add_transaction_button.clicked.connect(self.show_add_transaction_popup)
 
         self.add_delete_button = QtWidgets.QPushButton('Delete')
-        self.add_delete_button.clicked.connect(self.delete_row)
+        self.add_delete_button.clicked.connect(self.delete_selected_row)
 
         self.figure_canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
@@ -85,7 +89,10 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
 
         main_layout = QtWidgets.QHBoxLayout()
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.dateEdit)
+        dates_layout = QtWidgets.QHBoxLayout()
+        dates_layout.addWidget(self.dateEdit)
+        dates_layout.addWidget(self.transferBtn)
+        layout.addLayout(dates_layout)
         layout.addWidget(self.tree)
 
         button_layout = QtWidgets.QHBoxLayout()
@@ -136,8 +143,12 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         self.budget_updated.connect(self.budget.update_budget)
         '''
 
-    def get_data_for_date(self, input_year: str, input_month: str) -> None:
-        ''' Populates the tree widget with data from the json file.
+    def get_data_for_date(self,
+                          input_year: str,
+                          input_month: str,
+                          disable_spending: bool = False,
+                          disable_comment: bool = False) -> None:
+        """ Populates the tree widget with data from the json file.
 
         :Example:
 
@@ -153,7 +164,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         ...         }
         ...     }
         ...}
-        '''
+        """
 
         self.tree.clear()
 
@@ -166,6 +177,10 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             category_item = BudgetCategoryItem(self.tree)
             category_item.setText(0, category)
             for expense, expenseData in category_data.items():
+                if disable_spending:
+                    expenseData["Spending"] = 0
+                if disable_comment:
+                    expenseData["Comment"] = ""
                 BudgetItem(category_item,
                            expense,
                            round(float(expenseData["Allotted"]), 2),
@@ -180,6 +195,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         super().closeEvent(event)
 
     def on_calendar_selection_changed(self):
+        print(self.sender())
         # Update the table data when the calendar selection changes
         print(f'month : {self.dateEdit.calendarWidget().selectedDate().toString("yyyy")}')
         print(f'month : {self.dateEdit.calendarWidget().selectedDate().toString("MMMM")}')
@@ -187,17 +203,46 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
                                self.dateEdit.calendarWidget().selectedDate().toString("MMMM"))
         # self.set_table_data()
 
+    def transfer_from_previous_month(self):
+        current_date = self.dateEdit.calendarWidget().selectedDate()
+
+        previous_month_date = current_date.addMonths(-1)
+        self.get_data_for_date(previous_month_date.toString("yyyy"),
+                               previous_month_date.toString("MMMM"),
+                               disable_spending=True)
+
     def save_tree_data(self):
+
         # Get the selected month from the calendar widget
         selected_year = self.dateEdit.calendarWidget().selectedDate().toString("yyyy")
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
-
         # Iterate over the tree and save the data
         selected_month_data = {}
+
         try:
-            selected_month_data = self.budget.data[selected_year][selected_month]
+            original_month_data = self.budget.data[selected_year][selected_month]
+            selected_month_data = original_month_data
         except KeyError as e:
             print("Nothing to save")
+
+        iter_data = {key: value for key, value in original_month_data.items()
+                     if not self.tree.find_category_item(key)}
+        for key in iter_data.keys():
+            self.del_row_signal.emit(selected_year,
+                                     selected_month,
+                                     key,
+                                     "")
+
+        iter_data_exp = {(key, key1) for key, value in original_month_data.items()
+                         for key1 in value.keys()
+                         if not self.tree.find_expense_item(key, key1)}
+        for key, key1 in iter_data_exp:
+            if not self.tree.find_expense_item(key, key1):
+                self.del_row_signal.emit(selected_year,
+                                         selected_month,
+                                         key,
+                                         key1)
+
         # items = self.tree.findItems("", QtCore.Qt.MatchContains) if parent is None else parent.takeChildren()
         for i in range(self.tree.topLevelItemCount()):
             category_item = self.tree.topLevelItem(i)
@@ -280,7 +325,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
     def tree_update_spending(self, month_data):
         self.tree.update_expense_spending(month_data)
 
-    def delete_row(self):
+    def delete_selected_row(self):
         selected_year = self.dateEdit.calendarWidget().selectedDate().toString("yyyy")
         selected_month = self.dateEdit.calendarWidget().selectedDate().toString("MMMM")
         self.tree.remove_currently_selected(selected_year, selected_month)
@@ -416,6 +461,8 @@ class AddTransactionPopup(QtWidgets.QDialog):
             self.parent().del_transaction_signal.emit(data)
 
     def populate_subcategories(self):
+        #TODO : also clear the comboboxes if categories were deleted
+
         if self.sender().currentText() == "Add/Edit...":
             self.add_new_category(self.sender())
         subcategories = self.month_data.get(self.combo_category.currentText())
@@ -658,6 +705,7 @@ class BudgetTreeWidget(QtWidgets.QTreeWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+
         self.setStyleSheet("""
             QTreeWidget{
                 border: 0;
