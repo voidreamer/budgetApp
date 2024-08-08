@@ -283,21 +283,43 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
             return
 
         # Extract the category, expense, and spending data from the JSON data
-        expenses = []
+        categories = []
+        allotted = {}
+        spending = {}
         amounts = []
         types = []
+        overall = {}
+        overall.update({"Allotted": 0.0, "Spending": 0.0})
 
         for category, subdict in data.items():
+            categories.append(category)
+            allotted.update({category: 0.0})
+            spending.update({category: 0.0})
             for subcategory, values in subdict.items():
-                expenses.append(subcategory)
-                amounts.append(float(values['Allotted']))
-                types.append('Allotted')
-                expenses.append(subcategory)
-                amounts.append(float(values['Spending']))
-                types.append('Spending')
+                # expenses.append(subcategory)
+                allotted[category] += float(values['Allotted'])
+                # amounts.append(float(values['Allotted']))
+                # types.append('Allotted')
+                # expenses.append(subcategory)
+                spending[category] += float(values['Spending'])
+                # amounts.append(float(values['Spending']))
+                # types.append('Spending')
+            amounts.append(allotted[category])
+            overall["Allotted"] += allotted[category]
+            types.append('Allotted')
+            amounts.append(spending[category])
+            overall["Spending"] += spending[category]
+            types.append("Spending")
+            categories.append(category)
+        categories.append("Overall")
+        categories.append("Overall")
+        amounts.append(overall["Allotted"])
+        types.append('Allotted')
+        amounts.append(overall["Spending"])
+        types.append('Spending')
 
         # Create a dataframe with the data
-        data = pd.DataFrame({'expenses': expenses, 'amounts': amounts, 'types': types})
+        data = pd.DataFrame({'expenses': categories, 'amounts': amounts, 'types': types})
 
         # Set the theme of the plot
         sns.set_theme(style="whitegrid", palette="pastel", font_scale=1.2, color_codes=True)
@@ -313,7 +335,7 @@ class BudgetEditorWindow(QtWidgets.QMainWindow):
         sns.despine(offset=10)
 
         # Adjust the spacing and padding
-        plt.tight_layout(pad=1)
+        plt.tight_layout(pad=2.5)
 
         # Add labels and numbers to the barplot
         for container in ax.containers:
