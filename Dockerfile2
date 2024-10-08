@@ -1,0 +1,44 @@
+# Use an official Python runtime as a parent image
+FROM python:3.9.19
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Note: Adding libxcb-cursor0, libegl1, and other dependencies for PySide6 and the XCB platform plugin
+# Install necessary system dependencies for running a PySide6 application
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libxkbcommon-x11-0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-randr0 \
+    libxcb-render-util0 \
+    libxcb-render0 \
+    libxcb-shape0 \
+    libxcb-sync1 \
+    libxcb-xfixes0 \
+    libxcb-xinerama0 \
+    libxcb-xkb1 \
+    libxcb1 \
+    libxrender1 \
+    libxi6 \
+    libdbus-1-3 \
+    libxcb-cursor0 \
+    libegl1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PySide6 without specifying a version to get the latest
+RUN pip install --upgrade pip && \
+    pip install PySide2
+
+# Define environment variable
+ENV NAME=MockTOEFL
+
+# Command to run the application
+COPY . /app/budget
+CMD ["python", "budget/budgetApp.py"]
